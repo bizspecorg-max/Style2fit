@@ -12,38 +12,47 @@ import Customers from "./pages/Customers";
 import Styles from "./pages/Styles";
 import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
-import ResetPassword from "./pages/ResetPassword"; // ✅ added
+import ResetPassword from "./pages/ResetPassword";
+import Profile from "./pages/Profile"; // ✅ new import
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/reset-password" element={<ResetPassword />} /> {/* ✅ new route */}
-            <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/customers" element={<Customers />} />
-              <Route path="/styles" element={<Styles />} />
-              <Route path="/orders" element={<Orders />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+	<QueryClientProvider client={queryClient}>
+		<TooltipProvider>
+			<Toaster />
+			<Sonner />
+			<BrowserRouter>
+				<AuthProvider>
+					<Routes>
+						<Route path="/auth" element={<Auth />} />
+						<Route path="/reset-password" element={<ResetPassword />} />
+						<Route
+							element={
+								<ProtectedRoute>
+									<AppLayout />
+								</ProtectedRoute>
+							}
+						>
+							<Route path="/" element={<Dashboard />} />
+							<Route path="/customers" element={<Customers />} />
+							<Route path="/styles" element={<Styles />} />
+							<Route path="/orders" element={<Orders />} />
+							<Route path="/profile" element={<Profile />} />{" "}
+							{/* ✅ new route */}
+						</Route>
+						<Route path="*" element={<NotFound />} />
+					</Routes>
+				</AuthProvider>
+			</BrowserRouter>
+		</TooltipProvider>
+	</QueryClientProvider>
 );
 
 export default App;
 
 // In main.tsx, before rendering
-if ('ontouchstart' in window) {
-  // Disable auto-focus on mobile devices
-  document.body.style.touchAction = 'manipulation';
+if ("ontouchstart" in window) {
+	// Disable auto-focus on mobile devices
+	document.body.style.touchAction = "manipulation";
 }
