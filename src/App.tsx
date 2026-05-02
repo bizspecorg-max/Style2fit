@@ -12,6 +12,7 @@ import Customers from "./pages/Customers";
 import Styles from "./pages/Styles";
 import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
+import ResetPassword from "./pages/ResetPassword"; // ✅ added
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} /> {/* ✅ new route */}
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/customers" element={<Customers />} />
@@ -39,4 +41,9 @@ const App = () => (
 );
 
 export default App;
-console.log("App rendering");
+
+// In main.tsx, before rendering
+if ('ontouchstart' in window) {
+  // Disable auto-focus on mobile devices
+  document.body.style.touchAction = 'manipulation';
+}

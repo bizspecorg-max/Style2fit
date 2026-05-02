@@ -7,24 +7,34 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Scissors, Loader2 } from "lucide-react";
+import { Scissors, Loader2, Eye, EyeOff } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const signInSchema = z.object({
 	email: z.string().email("Invalid email").max(255),
 	password: z.string().min(6, "Min 6 characters").max(72),
 });
 
-const signUpSchema = signInSchema.extend({
-	business_name: z.string().trim().min(1, "Required").max(100),
-	full_name: z.string().trim().min(1, "Required").max(100),
-	phone: z.string().trim().min(7, "Enter a valid phone").max(20),
-});
+const signUpSchema = signInSchema
+	.extend({
+		business_name: z.string().trim().min(1, "Required").max(100),
+		full_name: z.string().trim().min(1, "Required").max(100),
+		phone: z.string().trim().min(7, "Enter a valid phone").max(20),
+		confirmPassword: z.string().min(6, "Min 6 characters"),
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		message: "Passwords don't match",
+		path: ["confirmPassword"],
+	});
 
 const Auth = () => {
 	const { user, loading, signIn, signUp } = useAuth();
 	const navigate = useNavigate();
 	const [tab, setTab] = useState<"signin" | "signup">("signin");
 	const [submitting, setSubmitting] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const [resetCooldown, setResetCooldown] = useState(false); // ✅ added
 
 	useEffect(() => {
 		document.title = "Sign in · Style2Fit";
@@ -61,6 +71,7 @@ const Auth = () => {
 		const parsed = signUpSchema.safeParse({
 			email: fd.get("email"),
 			password: fd.get("password"),
+			confirmPassword: fd.get("confirmPassword"),
 			business_name: fd.get("business_name"),
 			full_name: fd.get("full_name"),
 			phone: fd.get("phone"),
@@ -70,7 +81,13 @@ const Auth = () => {
 			return;
 		}
 		setSubmitting(true);
-		const { error } = await signUp(parsed.data as Required<typeof parsed.data>);
+		const { error } = await signUp({
+			email: parsed.data.email,
+			password: parsed.data.password,
+			business_name: parsed.data.business_name,
+			full_name: parsed.data.full_name,
+			phone: parsed.data.phone,
+		});
 		setSubmitting(false);
 		if (error) {
 			toast.error(error.message);
@@ -80,9 +97,46 @@ const Auth = () => {
 		navigate("/", { replace: true });
 	};
 
+	// ✅ Improved forgot password handler with cooldown and validation
+	const handleForgotPassword = async () => {
+		if (resetCooldown) {
+			toast.error("Please wait a moment before requesting another reset.");
+			return;
+		}
+
+		const emailInput = document.getElementById("email") as HTMLInputElement;
+		const email = emailInput?.value?.trim();
+
+		if (!email) {
+			toast.error("Please enter your email address first");
+			return;
+		}
+
+		// Basic email format check
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(email)) {
+			toast.error("Please enter a valid email address");
+			return;
+		}
+
+		setResetCooldown(true);
+
+		const { error } = await supabase.auth.resetPasswordForEmail(email, {
+			redirectTo: `${window.location.origin}/reset-password`,
+		});
+
+		if (error) {
+			toast.error(error.message);
+		} else {
+			toast.success("Password reset link sent! Check your email.");
+		}
+
+		setTimeout(() => setResetCooldown(false), 60000);
+	};
+
 	return (
 		<div className="min-h-screen grid md:grid-cols-2">
-			{/* Brand panel - desktop (unchanged) */}
+			{/* Brand panel - desktop */}
 			<div className="hidden md:flex flex-col justify-between p-10 bg-gradient-hero text-primary-foreground">
 				<div className="flex items-center gap-2">
 					<div className="h-10 w-10 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold">
@@ -105,11 +159,11 @@ const Auth = () => {
 				</p>
 			</div>
 
-			{/* Form section – now with mobile brand header */}
-			<div className="flex items-center justify-center p-6 md:p-10 bg-background">
+			{/* Form section – only spacing tweaked, no content removal */}
+			<div className="flex items-center justify-center p-5 md:p-10 bg-background">
 				<div className="w-full max-w-md">
-					{/* Mobile brand header (visible only on small screens) */}
-					<div className="md:hidden flex flex-col items-center text-center mb-8 p-4 rounded-xl bg-gradient-hero text-primary-foreground">
+					{/* Mobile brand header – original colors and text, reduced top padding */}
+					<div className="md:hidden flex flex-col items-center text-center mb-6 p-4 rounded-xl bg-gradient-hero text-primary-foreground">
 						<div className="h-12 w-12 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold mb-3">
 							<Scissors className="h-6 w-6 text-accent-foreground" />
 						</div>
@@ -138,13 +192,40 @@ const Auth = () => {
 									autoComplete="email"
 									required
 								/>
-								<Field
-									id="password"
-									label="Password"
-									type="password"
-									autoComplete="current-password"
-									required
-								/>
+								<div className="space-y-1.5">
+									<Label htmlFor="password">Password</Label>
+									<div className="relative">
+										<Input
+											id="password"
+											name="password"
+											type={showPassword ? "text" : "password"}
+											className="h-12 pr-10"
+											autoComplete="current-password"
+											required
+										/>
+										<button
+											type="button"
+											className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+											onClick={() => setShowPassword(!showPassword)}
+										>
+											{showPassword ? (
+												<EyeOff className="h-4 w-4" />
+											) : (
+												<Eye className="h-4 w-4" />
+											)}
+										</button>
+									</div>
+								</div>
+								<div className="text-right">
+									<button
+										type="button"
+										onClick={handleForgotPassword}
+										disabled={resetCooldown}
+										className="text-xs text-primary underline-offset-2 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+									>
+										{resetCooldown ? "Wait 60s" : "Forgot password?"}
+									</button>
+								</div>
 								<Button
 									type="submit"
 									className="w-full h-12 text-base"
@@ -181,13 +262,56 @@ const Auth = () => {
 									autoComplete="email"
 									required
 								/>
-								<Field
-									id="password"
-									label="Password (min 6)"
-									type="password"
-									autoComplete="new-password"
-									required
-								/>
+								<div className="space-y-1.5">
+									<Label htmlFor="password">Password (min 6)</Label>
+									<div className="relative">
+										<Input
+											id="password"
+											name="password"
+											type={showPassword ? "text" : "password"}
+											className="h-12 pr-10"
+											autoComplete="new-password"
+											required
+										/>
+										<button
+											type="button"
+											className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+											onClick={() => setShowPassword(!showPassword)}
+										>
+											{showPassword ? (
+												<EyeOff className="h-4 w-4" />
+											) : (
+												<Eye className="h-4 w-4" />
+											)}
+										</button>
+									</div>
+								</div>
+								<div className="space-y-1.5">
+									<Label htmlFor="confirmPassword">Confirm password</Label>
+									<div className="relative">
+										<Input
+											id="confirmPassword"
+											name="confirmPassword"
+											type={showConfirmPassword ? "text" : "password"}
+											className="h-12 pr-10"
+											autoComplete="off"
+											required
+										/>
+										<button
+											type="button"
+											className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+											onClick={() =>
+												setShowConfirmPassword(!showConfirmPassword)
+											}
+										>
+											{showConfirmPassword ? (
+												<EyeOff className="h-4 w-4" />
+											) : (
+												<Eye className="h-4 w-4" />
+											)}
+										</button>
+									</div>
+								</div>
 								<Button
 									type="submit"
 									className="w-full h-12 text-base"
