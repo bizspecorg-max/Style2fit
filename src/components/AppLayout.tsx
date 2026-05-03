@@ -7,6 +7,7 @@ import {
 	LogOut,
 	Scissors,
 	User,
+	Ruler,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ type NavItem = {
 	to: string;
 	label: string;
 	icon: React.ComponentType<{ className?: string }>;
-	end?: boolean; // made optional
+	end?: boolean;
 };
 
 const mainNav: NavItem[] = [
@@ -24,6 +25,7 @@ const mainNav: NavItem[] = [
 	{ to: "/customers", label: "Customers", icon: Users },
 	{ to: "/styles", label: "Styles", icon: Shirt },
 	{ to: "/orders", label: "Orders", icon: ClipboardList },
+	{ to: "/quick-measure", label: "Quick Measure", icon: Ruler },
 ];
 
 const secondaryNav: NavItem[] = [
@@ -57,7 +59,6 @@ export const AppLayout = () => {
 					</div>
 				</div>
 
-				{/* Main navigation */}
 				<nav className="flex-1 px-3 space-y-1">
 					{mainNav.map((n) => (
 						<NavLink
@@ -79,7 +80,6 @@ export const AppLayout = () => {
 					))}
 				</nav>
 
-				{/* Secondary navigation (Profile) at bottom, then Sign out */}
 				<div className="px-3 pb-3">
 					{secondaryNav.map((n) => (
 						<NavLink
@@ -132,9 +132,11 @@ export const AppLayout = () => {
 				<Outlet />
 			</main>
 
-			{/* Mobile bottom nav – Profile included at the end */}
+			{/* Mobile bottom nav */}
 			<nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border safe-pb">
-				<ul className="grid grid-cols-5">
+				<ul className="grid grid-cols-6">
+					{" "}
+					{/* 5 mainNav + 1 secondaryNav = 6 */}
 					{[...mainNav, ...secondaryNav].map((n) => (
 						<li key={n.to}>
 							<NavLink

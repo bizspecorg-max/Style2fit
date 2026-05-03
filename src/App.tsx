@@ -13,7 +13,8 @@ import Styles from "./pages/Styles";
 import Orders from "./pages/Orders";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
-import Profile from "./pages/Profile"; // ✅ new import
+import Profile from "./pages/Profile";
+import QuickMeasure from "./pages/QuickMeasure"; // ✅ import the new page
 
 const queryClient = new QueryClient();
 
@@ -38,7 +39,8 @@ const App = () => (
 							<Route path="/customers" element={<Customers />} />
 							<Route path="/styles" element={<Styles />} />
 							<Route path="/orders" element={<Orders />} />
-							<Route path="/profile" element={<Profile />} />{" "}
+							<Route path="/profile" element={<Profile />} />
+							<Route path="/quick-measure" element={<QuickMeasure />} />{" "}
 							{/* ✅ new route */}
 						</Route>
 						<Route path="*" element={<NotFound />} />
