@@ -12,13 +12,6 @@ import {
 	DialogTitle,
 	DialogFooter,
 } from "@/components/ui/dialog";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { Plus, Trash2, Loader2, Eye } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,21 +32,20 @@ const QuickMeasure = () => {
 	const [customers, setCustomers] = useState<Customer[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [open, setOpen] = useState(false);
-	const [saving, setSaving] = useState(false);
 	const [viewOpen, setViewOpen] = useState(false);
-	const [viewingMeasurement, setViewingMeasurement] =
-		useState<Measurement | null>(null);
-
-	// New customer modal
-	const [newCustomerOpen, setNewCustomerOpen] = useState(false);
-	const [newCustomerName, setNewCustomerName] = useState("");
-	const [newCustomerPhone, setNewCustomerPhone] = useState("");
+	const [viewing, setViewing] = useState<Measurement | null>(null);
+	const [saving, setSaving] = useState(false);
 
 	// Form state for new measurement
 	const [title, setTitle] = useState("");
 	const [customerId, setCustomerId] = useState("");
 	const [fields, setFields] = useState<MeasurementField[]>([]);
 	const [values, setValues] = useState<Record<string, string>>({});
+
+	// New customer modal state
+	const [newCustomerOpen, setNewCustomerOpen] = useState(false);
+	const [newCustomerName, setNewCustomerName] = useState("");
+	const [newCustomerPhone, setNewCustomerPhone] = useState("");
 
 	useEffect(() => {
 		document.title = "Quick Measure · Style2Fit";
@@ -106,6 +98,7 @@ const QuickMeasure = () => {
 		setValues(newValues);
 	};
 
+	// Create new customer (from nested modal)
 	const createNewCustomer = async () => {
 		if (!newCustomerName.trim()) {
 			toast.error("Customer name required");
@@ -129,6 +122,7 @@ const QuickMeasure = () => {
 		setNewCustomerName("");
 		setNewCustomerPhone("");
 		await loadData();
+		// Automatically select the newly created customer
 		setCustomerId(data.id);
 	};
 
@@ -180,7 +174,7 @@ const QuickMeasure = () => {
 	};
 
 	const viewMeasurement = (m: Measurement) => {
-		setViewingMeasurement(m);
+		setViewing(m);
 		setViewOpen(true);
 	};
 
@@ -267,22 +261,23 @@ const QuickMeasure = () => {
 						<DialogTitle>New measurement</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-4">
-						{/* Customer selector with "New customer" button */}
+						{/* Customer selector with native select + New button */}
 						<div className="space-y-1.5">
 							<Label>Customer *</Label>
 							<div className="flex gap-2">
-								<Select value={customerId} onValueChange={setCustomerId}>
-									<SelectTrigger className="flex-1 h-11">
-										<SelectValue placeholder="Pick a customer" />
-									</SelectTrigger>
-									<SelectContent>
-										{customers.map((c) => (
-											<SelectItem key={c.id} value={c.id}>
-												{c.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
+								<select
+									value={customerId}
+									onChange={(e) => setCustomerId(e.target.value)}
+									className="flex-1 h-11 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+									required
+								>
+									<option value="">Select a customer...</option>
+									{customers.map((c) => (
+										<option key={c.id} value={c.id}>
+											{c.name}
+										</option>
+									))}
+								</select>
 								<Button
 									type="button"
 									variant="outline"
@@ -292,6 +287,11 @@ const QuickMeasure = () => {
 									<Plus className="h-4 w-4" />
 								</Button>
 							</div>
+							{customers.length === 0 && (
+								<p className="text-xs text-muted-foreground">
+									No customers yet. Click the + button to add one.
+								</p>
+							)}
 						</div>
 
 						{/* Title */}
@@ -389,7 +389,7 @@ const QuickMeasure = () => {
 						/>
 					</div>
 					<DialogFooter>
-						<Button onClick={createNewCustomer}>Create</Button>
+						<Button onClick={createNewCustomer}>Create customer</Button>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
@@ -398,27 +398,32 @@ const QuickMeasure = () => {
 			<Dialog open={viewOpen} onOpenChange={setViewOpen}>
 				<DialogContent className="sm:max-w-md">
 					<DialogHeader>
-						<DialogTitle>{viewingMeasurement?.title}</DialogTitle>
+						<DialogTitle>{viewing?.title}</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-3">
-						<p className="text-sm text-muted-foreground">
-							Customer: {viewingMeasurement?.customers?.name ?? "—"}
-						</p>
-						<div className="border rounded-lg p-3 space-y-2">
-							{viewingMeasurement?.fields.map((field) => (
-								<div key={field.key} className="flex justify-between text-sm">
-									<span className="font-medium">{field.label}:</span>
-									<span>
-										{viewingMeasurement.values[field.key] || "—"} {field.unit}
-									</span>
-								</div>
-							))}
+						<div className="text-sm">
+							<span className="font-medium">Customer:</span>{" "}
+							{viewing?.customers?.name ?? "—"}
 						</div>
-						<p className="text-xs text-muted-foreground">
-							Created:{" "}
-							{viewingMeasurement &&
-								new Date(viewingMeasurement.created_at).toLocaleString()}
-						</p>
+						<div className="text-sm">
+							<span className="font-medium">Created:</span>{" "}
+							{viewing?.created_at
+								? new Date(viewing.created_at).toLocaleString()
+								: "—"}
+						</div>
+						<div className="border-t pt-2">
+							<Label>Measurements</Label>
+							<div className="mt-2 space-y-1">
+								{viewing?.fields.map((field) => (
+									<div key={field.key} className="flex justify-between text-sm">
+										<span>{field.label}:</span>
+										<span className="font-medium">
+											{viewing.values[field.key] || "—"} {field.unit}
+										</span>
+									</div>
+								))}
+							</div>
+						</div>
 					</div>
 					<DialogFooter>
 						<Button onClick={() => setViewOpen(false)}>Close</Button>

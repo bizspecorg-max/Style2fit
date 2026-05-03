@@ -25,7 +25,7 @@ const mainNav: NavItem[] = [
 	{ to: "/customers", label: "Customers", icon: Users },
 	{ to: "/styles", label: "Styles", icon: Shirt },
 	{ to: "/orders", label: "Orders", icon: ClipboardList },
-	{ to: "/quick-measure", label: "Quick Measure", icon: Ruler },
+	{ to: "/quick-measure", label: "Measure", icon: Ruler },
 ];
 
 const secondaryNav: NavItem[] = [
