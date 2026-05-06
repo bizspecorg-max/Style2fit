@@ -217,7 +217,7 @@ const Auth = () => {
 							alt="Style2Fit"
 							className="h-12 w-auto object-contain mb-2"
 						/>
-						<span className="font-display text-2xl font-bold">Style2Fit</span>
+						
 						<p className="text-sm text-primary-foreground/80 mt-2 max-w-xs">
 							Throw away the measurement book. One place for customers, styles,
 							and orders.
