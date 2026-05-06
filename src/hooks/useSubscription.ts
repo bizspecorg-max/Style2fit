@@ -24,7 +24,7 @@ export const useSubscription = () => {
 				.from("subscriptions")
 				.select("*")
 				.eq("user_id", user!.id)
-				.maybeSingle(); // use maybeSingle, not single, to avoid 404 error
+				.maybeSingle();
 
 			if (error) throw error;
 
@@ -32,7 +32,7 @@ export const useSubscription = () => {
 			if (!data) {
 				console.warn("No subscription found for user, using default trial");
 				const defaultTrialEnd = new Date();
-				defaultTrialEnd.setDate(defaultTrialEnd.getDate() + 7);
+				defaultTrialEnd.setDate(defaultTrialEnd.getDate() + 14); // ✅ changed from 7 to 14 days
 				return {
 					id: "temp",
 					user_id: user!.id,
