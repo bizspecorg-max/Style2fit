@@ -5,9 +5,8 @@ import {
 	Shirt,
 	ClipboardList,
 	LogOut,
-	Scissors,
-	User,
 	Ruler,
+	User,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -46,17 +45,13 @@ export const AppLayout = () => {
 			{/* Sidebar (desktop) */}
 			<aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
 				<div className="px-6 py-6 flex items-center gap-2">
-					<div className="h-9 w-9 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold">
-						<Scissors className="h-5 w-5 text-accent-foreground" />
-					</div>
-					<div>
-						<div className="font-display text-xl font-bold tracking-tight">
-							Style2Fit
-						</div>
-						<div className="text-[11px] uppercase tracking-widest text-sidebar-foreground/60">
-							Tailor OS
-						</div>
-					</div>
+					{/* 👇 Logo image instead of Scissors icon */}
+					<img
+						src="https://res.cloudinary.com/dfmigbgri/image/upload/v1778103874/Stlye_2fit_rxojiu.png"
+						alt="Style2Fit"
+						className="h-9 w-auto object-contain"
+					/>
+					
 				</div>
 
 				<nav className="flex-1 px-3 space-y-1">
@@ -112,9 +107,12 @@ export const AppLayout = () => {
 			<header className="md:hidden sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border">
 				<div className="flex items-center justify-between px-4 h-14">
 					<div className="flex items-center gap-2">
-						<div className="h-8 w-8 rounded-lg bg-gradient-gold flex items-center justify-center">
-							<Scissors className="h-4 w-4 text-accent-foreground" />
-						</div>
+						{/* 👇 Logo image on mobile too */}
+						<img
+							src="https://res.cloudinary.com/dfmigbgri/image/upload/v1778103874/Stlye_2fit_rxojiu.png"
+							alt="Style2Fit"
+							className="h-8 w-auto object-contain"
+						/>
 						<span className="font-display text-lg font-bold">Style2Fit</span>
 					</div>
 					<Button
@@ -135,8 +133,6 @@ export const AppLayout = () => {
 			{/* Mobile bottom nav */}
 			<nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card border-t border-border safe-pb">
 				<ul className="grid grid-cols-6">
-					{" "}
-					{/* 5 mainNav + 1 secondaryNav = 6 */}
 					{[...mainNav, ...secondaryNav].map((n) => (
 						<li key={n.to}>
 							<NavLink

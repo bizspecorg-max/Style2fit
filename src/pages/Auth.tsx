@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Scissors, Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const signInSchema = z.object({
@@ -28,7 +28,7 @@ const signUpSchema = signInSchema
 	});
 
 // ----------------------------------------------------------------------
-// Forgot Password Modal (added – no changes to existing code)
+// Forgot Password Modal (unchanged)
 // ----------------------------------------------------------------------
 const ForgotPasswordModal = ({
 	open,
@@ -96,7 +96,7 @@ const Auth = () => {
 	const [submitting, setSubmitting] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-	const [forgotOpen, setForgotOpen] = useState(false); // ✅ added for modal
+	const [forgotOpen, setForgotOpen] = useState(false);
 
 	useEffect(() => {
 		document.title = "Sign in · Style2Fit";
@@ -159,10 +159,8 @@ const Auth = () => {
 		navigate("/", { replace: true });
 	};
 
-	// ✅ UPDATED: Use production URL when deployed, otherwise fallback to localhost
 	const handleSendReset = async (email: string) => {
-		// You can replace this with your actual production domain
-		const productionUrl = "https://style2fit.vercel.app"; // ← change to your real domain
+		const productionUrl = "https://style2fit.vercel.app";
 		const redirectUrl =
 			import.meta.env.PROD || window.location.hostname !== "localhost"
 				? `${productionUrl}/reset-password`
@@ -178,15 +176,21 @@ const Auth = () => {
 		}
 	};
 
+	// Logo URL
+	const logoUrl =
+		"https://res.cloudinary.com/dfmigbgri/image/upload/v1778103874/Stlye_2fit_rxojiu.png";
+
 	return (
 		<div className="min-h-screen grid md:grid-cols-2">
-			{/* Brand panel - desktop */}
+			{/* Brand panel - desktop (updated with logo image) */}
 			<div className="hidden md:flex flex-col justify-between p-10 bg-gradient-hero text-primary-foreground">
 				<div className="flex items-center gap-2">
-					<div className="h-10 w-10 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold">
-						<Scissors className="h-5 w-5 text-accent-foreground" />
-					</div>
-					<span className="font-display text-2xl font-bold">Style2Fit</span>
+					<img
+						src={logoUrl}
+						alt="Style2Fit"
+						className="h-10 w-auto object-contain"
+					/>
+					<span className="font-display text-2xl font-bold"></span>
 				</div>
 				<div className="space-y-6 max-w-sm">
 					<h1 className="font-display text-5xl font-bold leading-[1.05] text-balance">
@@ -203,14 +207,16 @@ const Auth = () => {
 				</p>
 			</div>
 
-			{/* Form section – only spacing tweaked, no content removal */}
+			{/* Form section – mobile brand header updated with logo */}
 			<div className="flex items-center justify-center p-5 md:p-10 bg-background">
 				<div className="w-full max-w-md">
-					{/* Mobile brand header – original colors and text, reduced top padding */}
+					{/* Mobile brand header – now with logo image */}
 					<div className="md:hidden flex flex-col items-center text-center mb-6 p-4 rounded-xl bg-gradient-hero text-primary-foreground">
-						<div className="h-12 w-12 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold mb-3">
-							<Scissors className="h-6 w-6 text-accent-foreground" />
-						</div>
+						<img
+							src={logoUrl}
+							alt="Style2Fit"
+							className="h-12 w-auto object-contain mb-2"
+						/>
 						<span className="font-display text-2xl font-bold">Style2Fit</span>
 						<p className="text-sm text-primary-foreground/80 mt-2 max-w-xs">
 							Throw away the measurement book. One place for customers, styles,
@@ -263,7 +269,7 @@ const Auth = () => {
 								<div className="text-right">
 									<button
 										type="button"
-										onClick={() => setForgotOpen(true)} // ✅ opens modal
+										onClick={() => setForgotOpen(true)}
 										className="text-xs text-primary underline-offset-2 hover:underline"
 									>
 										Forgot password?
@@ -371,7 +377,7 @@ const Auth = () => {
 				</div>
 			</div>
 
-			{/* Forgot Password Modal (rendered here) */}
+			{/* Forgot Password Modal */}
 			<ForgotPasswordModal
 				open={forgotOpen}
 				onClose={() => setForgotOpen(false)}

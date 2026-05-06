@@ -12,6 +12,13 @@ import {
 	DialogTitle,
 	DialogFooter,
 } from "@/components/ui/dialog";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Plus, Trash2, Loader2, Eye } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,6 +33,15 @@ type Measurement = {
 	customers: { name: string } | null;
 };
 
+// Default measurement fields (like in Styles modal)
+const DEFAULT_FIELDS: MeasurementField[] = [
+	{ key: "chest", label: "Chest", unit: "inches" },
+	{ key: "waist", label: "Waist", unit: "inches" },
+	{ key: "hip", label: "Hip", unit: "inches" },
+	{ key: "length", label: "Length", unit: "inches" },
+	// Add more defaults as needed
+];
+
 const QuickMeasure = () => {
 	const { user } = useAuth();
 	const [measurements, setMeasurements] = useState<Measurement[]>([]);
@@ -36,10 +52,10 @@ const QuickMeasure = () => {
 	const [viewing, setViewing] = useState<Measurement | null>(null);
 	const [saving, setSaving] = useState(false);
 
-	// Form state for new measurement
+	// Form state
 	const [title, setTitle] = useState("");
 	const [customerId, setCustomerId] = useState("");
-	const [fields, setFields] = useState<MeasurementField[]>([]);
+	const [fields, setFields] = useState<MeasurementField[]>(DEFAULT_FIELDS);
 	const [values, setValues] = useState<Record<string, string>>({});
 
 	// New customer modal state
@@ -70,7 +86,7 @@ const QuickMeasure = () => {
 	const resetForm = () => {
 		setTitle("");
 		setCustomerId("");
-		setFields([]);
+		setFields(DEFAULT_FIELDS);
 		setValues({});
 	};
 
@@ -98,7 +114,6 @@ const QuickMeasure = () => {
 		setValues(newValues);
 	};
 
-	// Create new customer (from nested modal)
 	const createNewCustomer = async () => {
 		if (!newCustomerName.trim()) {
 			toast.error("Customer name required");
@@ -122,7 +137,6 @@ const QuickMeasure = () => {
 		setNewCustomerName("");
 		setNewCustomerPhone("");
 		await loadData();
-		// Automatically select the newly created customer
 		setCustomerId(data.id);
 	};
 
@@ -180,7 +194,6 @@ const QuickMeasure = () => {
 
 	return (
 		<div className="space-y-5 p-4 md:p-6">
-			{/* Header */}
 			<header className="flex items-center justify-between">
 				<div>
 					<h1 className="font-display text-3xl font-bold">Quick Measure</h1>
@@ -193,7 +206,7 @@ const QuickMeasure = () => {
 				</Button>
 			</header>
 
-			{/* List of measurements */}
+			{/* Table of measurements (unchanged) */}
 			{loading ? (
 				<div className="flex justify-center py-12">
 					<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -254,30 +267,34 @@ const QuickMeasure = () => {
 				</div>
 			)}
 
-			{/* New Measurement Modal */}
+			{/* New Measurement Modal – now matches Orders & Styles */}
 			<Dialog open={open} onOpenChange={setOpen}>
 				<DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
 					<DialogHeader>
 						<DialogTitle>New measurement</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-4">
-						{/* Customer selector with native select + New button */}
+						{/* Customer selector – using shadcn Select (like Orders) */}
 						<div className="space-y-1.5">
 							<Label>Customer *</Label>
 							<div className="flex gap-2">
-								<select
-									value={customerId}
-									onChange={(e) => setCustomerId(e.target.value)}
-									className="flex-1 h-11 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-									required
-								>
-									<option value="">Select a customer...</option>
-									{customers.map((c) => (
-										<option key={c.id} value={c.id}>
-											{c.name}
-										</option>
-									))}
-								</select>
+								<Select value={customerId} onValueChange={setCustomerId}>
+									<SelectTrigger className="flex-1 h-11">
+										<SelectValue placeholder="Pick a customer" />
+									</SelectTrigger>
+									<SelectContent>
+										{customers.length === 0 && (
+											<div className="px-2 py-1.5 text-sm text-muted-foreground">
+												No customers yet. Create one first.
+											</div>
+										)}
+										{customers.map((c) => (
+											<SelectItem key={c.id} value={c.id}>
+												{c.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
 								<Button
 									type="button"
 									variant="outline"
@@ -287,11 +304,6 @@ const QuickMeasure = () => {
 									<Plus className="h-4 w-4" />
 								</Button>
 							</div>
-							{customers.length === 0 && (
-								<p className="text-xs text-muted-foreground">
-									No customers yet. Click the + button to add one.
-								</p>
-							)}
 						</div>
 
 						{/* Title */}
@@ -305,7 +317,7 @@ const QuickMeasure = () => {
 							/>
 						</div>
 
-						{/* Dynamic fields */}
+						{/* Measurement fields – dynamic fields with default values (like Styles) */}
 						<div className="space-y-2">
 							<div className="flex items-center justify-between">
 								<Label>Measurement fields</Label>
