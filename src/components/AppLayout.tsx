@@ -40,20 +40,23 @@ export const AppLayout = () => {
 		navigate("/auth", { replace: true });
 	};
 
+	const logoUrl =
+		"https://res.cloudinary.com/dfmigbgri/image/upload/v1778103874/Stlye_2fit_rxojiu.png";
+
 	return (
 		<div className="min-h-screen bg-background pb-20 md:pb-0 md:pl-64">
 			{/* Sidebar (desktop) */}
 			<aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
 				<div className="px-6 py-6 flex items-center gap-2">
-					{/* 👇 Logo image instead of Scissors icon */}
 					<img
-						src="https://res.cloudinary.com/dfmigbgri/image/upload/v1778103874/Stlye_2fit_rxojiu.png"
+						src={logoUrl}
 						alt="Style2Fit"
 						className="h-9 w-auto object-contain"
 					/>
-					
+					<div>
+						
+					</div>
 				</div>
-
 				<nav className="flex-1 px-3 space-y-1">
 					{mainNav.map((n) => (
 						<NavLink
@@ -74,7 +77,6 @@ export const AppLayout = () => {
 						</NavLink>
 					))}
 				</nav>
-
 				<div className="px-3 pb-3">
 					{secondaryNav.map((n) => (
 						<NavLink
@@ -103,23 +105,22 @@ export const AppLayout = () => {
 				</div>
 			</aside>
 
-			{/* Mobile top bar */}
-			<header className="md:hidden sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border">
+			{/* Mobile top bar – brand primary background, original logo colours untouched */}
+			<header className="md:hidden sticky top-0 z-30 bg-primary shadow-sm">
 				<div className="flex items-center justify-between px-4 h-14">
-					<div className="flex items-center gap-2">
-						{/* 👇 Logo image on mobile too */}
+					<div className="flex items-center">
 						<img
-							src="https://res.cloudinary.com/dfmigbgri/image/upload/v1778103874/Stlye_2fit_rxojiu.png"
+							src={logoUrl}
 							alt="Style2Fit"
-							className="h-8 w-auto object-contain"
+							className="h-9 w-auto object-contain"
 						/>
-						<span className="font-display text-lg font-bold">Style2Fit</span>
 					</div>
 					<Button
 						size="sm"
 						variant="ghost"
 						onClick={handleSignOut}
 						aria-label="Sign out"
+						className="text-primary-foreground hover:bg-primary-foreground/20"
 					>
 						<LogOut className="h-4 w-4" />
 					</Button>

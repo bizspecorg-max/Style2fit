@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -33,13 +33,12 @@ type Measurement = {
 	customers: { name: string } | null;
 };
 
-// Default measurement fields (like in Styles modal)
+// Default measurement fields
 const DEFAULT_FIELDS: MeasurementField[] = [
 	{ key: "chest", label: "Chest", unit: "inches" },
 	{ key: "waist", label: "Waist", unit: "inches" },
 	{ key: "hip", label: "Hip", unit: "inches" },
 	{ key: "length", label: "Length", unit: "inches" },
-	// Add more defaults as needed
 ];
 
 const QuickMeasure = () => {
@@ -63,12 +62,8 @@ const QuickMeasure = () => {
 	const [newCustomerName, setNewCustomerName] = useState("");
 	const [newCustomerPhone, setNewCustomerPhone] = useState("");
 
-	useEffect(() => {
-		document.title = "Quick Measure · Style2Fit";
-		if (user) loadData();
-	}, [user]);
-
-	const loadData = async () => {
+	// ✅ Fixed: useCallback to avoid missing dependency warning
+	const loadData = useCallback(async () => {
 		if (!user) return;
 		setLoading(true);
 		const [measRes, custRes] = await Promise.all([
@@ -81,7 +76,12 @@ const QuickMeasure = () => {
 		setMeasurements((measRes.data as unknown as Measurement[]) ?? []);
 		setCustomers((custRes.data as Customer[]) ?? []);
 		setLoading(false);
-	};
+	}, [user]);
+
+	useEffect(() => {
+		document.title = "Quick Measure · Style2Fit";
+		loadData();
+	}, [loadData]);
 
 	const resetForm = () => {
 		setTitle("");
@@ -206,7 +206,7 @@ const QuickMeasure = () => {
 				</Button>
 			</header>
 
-			{/* Table of measurements (unchanged) */}
+			{/* Table of measurements */}
 			{loading ? (
 				<div className="flex justify-center py-12">
 					<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -267,14 +267,14 @@ const QuickMeasure = () => {
 				</div>
 			)}
 
-			{/* New Measurement Modal – now matches Orders & Styles */}
+			{/* New Measurement Modal */}
 			<Dialog open={open} onOpenChange={setOpen}>
 				<DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
 					<DialogHeader>
 						<DialogTitle>New measurement</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-4">
-						{/* Customer selector – using shadcn Select (like Orders) */}
+						{/* Customer selector */}
 						<div className="space-y-1.5">
 							<Label>Customer *</Label>
 							<div className="flex gap-2">
@@ -317,7 +317,7 @@ const QuickMeasure = () => {
 							/>
 						</div>
 
-						{/* Measurement fields – dynamic fields with default values (like Styles) */}
+						{/* Dynamic fields */}
 						<div className="space-y-2">
 							<div className="flex items-center justify-between">
 								<Label>Measurement fields</Label>
