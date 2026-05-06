@@ -14,17 +14,36 @@ export type Subscription = {
 
 export const useSubscription = () => {
 	const { user } = useAuth();
+
 	return useQuery({
 		queryKey: ["subscription", user?.id],
 		enabled: !!user,
+		staleTime: 1000 * 60 * 5, // 5 minutes fresh
 		queryFn: async () => {
-			// Use type assertion to bypass TypeScript until table is added to types
-			const { data, error } = await (supabase as any)
+			const { data, error } = await supabase
 				.from("subscriptions")
 				.select("*")
 				.eq("user_id", user!.id)
-				.single();
+				.maybeSingle(); // use maybeSingle, not single, to avoid 404 error
+
 			if (error) throw error;
+
+			// If no subscription exists, create a default one in memory (without writing to DB)
+			if (!data) {
+				console.warn("No subscription found for user, using default trial");
+				const defaultTrialEnd = new Date();
+				defaultTrialEnd.setDate(defaultTrialEnd.getDate() + 7);
+				return {
+					id: "temp",
+					user_id: user!.id,
+					trial_start: new Date().toISOString().split("T")[0],
+					trial_end: defaultTrialEnd.toISOString().split("T")[0],
+					status: "trial",
+					subscription_type: null,
+					paid_until: null,
+				} as Subscription;
+			}
+
 			return data as Subscription;
 		},
 	});
