@@ -172,6 +172,17 @@ const Profile = () => {
 		window.open(url, "_blank");
 	};
 
+	// Calculate trial length from subscription start and end
+	const getTrialLength = () => {
+		if (!subscription || subscription.status !== "trial") return 7; // fallback
+		const start = new Date(subscription.trial_start);
+		const end = new Date(subscription.trial_end);
+		const diffDays = Math.ceil(
+			(end.getTime() - start.getTime()) / (1000 * 3600 * 24)
+		);
+		return diffDays > 0 ? diffDays : 14; // default to 14 if calculation fails
+	};
+
 	const getRemainingDays = () => {
 		if (!subscription || subscription.status !== "trial") return 0;
 		const endDate = new Date(subscription.trial_end);
@@ -189,6 +200,7 @@ const Profile = () => {
 	}
 
 	const remainingDays = getRemainingDays();
+	const trialLength = getTrialLength();
 	const isTrialValid = subscription?.status === "trial" && remainingDays > 0;
 	const isActive = subscription?.status === "active";
 
@@ -372,7 +384,7 @@ const Profile = () => {
 				</CardContent>
 			</Card>
 
-			{/* Subscription Card */}
+			{/* Subscription Card - updated with dynamic trial length */}
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
@@ -384,7 +396,7 @@ const Profile = () => {
 					{!isActive && (isTrialValid || subscription?.status === "trial") && (
 						<>
 							<p className="text-sm">
-								You are on a <strong>7-day free trial</strong>.
+								You are on a <strong>{trialLength}-day free trial</strong>.
 							</p>
 							{remainingDays > 0 && (
 								<p className="text-sm font-medium text-primary">
@@ -406,7 +418,7 @@ const Profile = () => {
 								Upgrade to paid plan – ₦5,000 / month
 							</Button>
 							<p className="text-xs text-muted-foreground">
-								After payment, we will activate your account manually.
+								After payment, we will activate your account within 30min.
 							</p>
 						</>
 					)}
