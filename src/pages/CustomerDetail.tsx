@@ -86,6 +86,7 @@ function MeasurementCard({ entry, customerName, onDelete }: { entry: HistoryEntr
 	const { t } = useTranslation();
 	const shop = useShop();
 	const lines = entry.items.map((i) => ({ label: i.label, value: formatMeasure(i.value, entry.unit, shop.unit, shop.locale) }));
+	const dateText = formatDate(entry.date, shop.locale);
 	const shareText = [
 		`${customerName} — ${entry.title}`,
 		formatDate(entry.date, shop.locale),
@@ -108,8 +109,8 @@ function MeasurementCard({ entry, customerName, onDelete }: { entry: HistoryEntr
 				<div className="min-w-0">
 					<h3 className="truncate font-semibold">{entry.title}</h3>
 					<p className="text-xs text-muted-foreground">
-						{formatDate(entry.date, shop.locale)}
-						{entry.subtitle && ` · ${entry.subtitle}`}
+						{/* Titles usually already carry the date — don't show it twice. */}
+						{[entry.title.includes(dateText) ? null : dateText, entry.subtitle].filter(Boolean).join(" · ")}
 					</p>
 				</div>
 				<div className="flex shrink-0 gap-1">

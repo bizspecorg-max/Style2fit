@@ -135,7 +135,9 @@ const QuickMeasure = () => {
 									<span className="min-w-0 flex-1">
 										<span className="block truncate font-medium">{m.customers?.name ?? "—"}</span>
 										<span className="block truncate text-sm text-muted-foreground">
-											{m.title} · {formatDate(m.created_at, shop.locale)}
+											{m.title.includes(formatDate(m.created_at, shop.locale))
+												? m.title
+												: `${m.title} · ${formatDate(m.created_at, shop.locale)}`}
 										</span>
 									</span>
 									<ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />

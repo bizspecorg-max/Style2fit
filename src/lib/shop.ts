@@ -34,7 +34,10 @@ export function formatMoney(amount: number | null | undefined, currency: string,
 
 export function formatDate(iso: string | null | undefined, locale: string): string {
 	if (!iso) return "—";
-	const date = new Date(iso.length === 10 ? `${iso}T00:00:00` : iso);
+	// "2026-09-10" is a calendar day. Timestamps without a zone come from UTC database
+	// columns, so read them as UTC — otherwise times near midnight show the wrong day.
+	const normalized = iso.length === 10 ? `${iso}T00:00:00` : /(z|[+-]\d{2}:?\d{2})$/i.test(iso) ? iso : `${iso}Z`;
+	const date = new Date(normalized);
 	return Number.isNaN(date.getTime()) ? "—" : new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(date);
 }
 
