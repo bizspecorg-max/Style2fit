@@ -15,9 +15,20 @@ import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import QuickMeasure from "./pages/QuickMeasure";
+import Onboarding from "./pages/Onboarding";
 import { useEffect } from "react";
 
-const queryClient = new QueryClient();
+// One cache for the whole app.
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			staleTime: 1000 * 60 * 5, // data stays fresh for 5 minutes
+			gcTime: 1000 * 60 * 10,
+			refetchOnWindowFocus: false,
+			retry: 1,
+		},
+	},
+});
 
 // Scroll to top on route change
 function ScrollToTop() {
@@ -39,6 +50,14 @@ const App = () => (
 					<Routes>
 						<Route path="/auth" element={<Auth />} />
 						<Route path="/reset-password" element={<ResetPassword />} />
+						<Route
+							path="/onboarding"
+							element={
+								<ProtectedRoute requireShop={false}>
+									<Onboarding />
+								</ProtectedRoute>
+							}
+						/>
 						<Route
 							element={
 								<ProtectedRoute>

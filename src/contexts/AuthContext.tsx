@@ -13,7 +13,11 @@ type SignUpData = {
 	password: string;
 	business_name: string;
 	full_name: string;
+	/** International format, e.g. +2348012345678 */
 	phone: string;
+	country: string;
+	currency: string;
+	unit: "cm" | "in";
 };
 
 type Ctx = {
@@ -60,10 +64,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			password: d.password,
 			options: {
 				emailRedirectTo: `${window.location.origin}/`,
+				// Same keys as before (the profile is created from these), plus shop settings.
 				data: {
 					business_name: d.business_name,
 					full_name: d.full_name,
 					phone: d.phone,
+					country: d.country,
+					currency: d.currency,
+					unit: d.unit,
 				},
 			},
 		});
@@ -79,13 +87,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 				.maybeSingle();
 
 			if (!profile && !profileError) {
-				// Fallback insert – using `as any` because the generated types expect a `user_id` column which doesn't exist in the actual table
 				await supabase.from("profiles").insert({
 					id: authData.user.id,
 					business_name: d.business_name,
 					full_name: d.full_name,
 					phone: d.phone,
-				} as any);
+				});
 			}
 		}
 
