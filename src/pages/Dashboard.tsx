@@ -84,7 +84,7 @@ function OrderList({ orders, empty }: { orders: RecentOrder[]; empty: string }) 
 		<ul className="divide-y">
 			{orders.map((o) => (
 				<li key={o.id}>
-					<Link to="/orders" className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none">
+					<Link to={`/orders/${o.id}`} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none">
 						<div className="min-w-0 flex-1">
 							<p className="truncate font-medium">{o.customers?.name ?? "—"}</p>
 							<p className="truncate text-xs text-muted-foreground">

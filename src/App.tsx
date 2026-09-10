@@ -16,6 +16,8 @@ const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Customers = lazy(() => import("./pages/Customers"));
 const CustomerDetail = lazy(() => import("./pages/CustomerDetail"));
+const NewOrder = lazy(() => import("./pages/NewOrder"));
+const OrderDetail = lazy(() => import("./pages/OrderDetail"));
 const Styles = lazy(() => import("./pages/Styles"));
 const Orders = lazy(() => import("./pages/Orders"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -74,6 +76,8 @@ const App = () => (
 								<Route path="/customers/:id" element={<CustomerDetail />} />
 								<Route path="/styles" element={<Styles />} />
 								<Route path="/orders" element={<Orders />} />
+								<Route path="/orders/new" element={<NewOrder />} />
+								<Route path="/orders/:id" element={<OrderDetail />} />
 								<Route path="/profile" element={<Profile />} />
 								<Route path="/quick-measure" element={<QuickMeasure />} />
 							</Route>

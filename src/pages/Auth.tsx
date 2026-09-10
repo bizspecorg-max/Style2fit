@@ -3,11 +3,12 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { AuthError } from "@supabase/supabase-js";
 import { z } from "zod";
-import { ArrowLeft, Check, Eye, EyeOff, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
+import { PasswordField } from "@/components/PasswordField";
 import { PasswordStrength } from "@/components/PasswordStrength";
 import { ShopFields, clearChangedShopErrors, type ShopErrors, type ShopState } from "@/components/ShopFields";
 import { Button } from "@/components/ui/button";
@@ -51,48 +52,6 @@ function FormError({ message }: { message?: string }) {
 		<p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
 			{message}
 		</p>
-	);
-}
-
-function PasswordField({
-	id,
-	value,
-	onChange,
-	autoComplete,
-	describedBy,
-	invalid,
-}: {
-	id: string;
-	value: string;
-	onChange: (value: string) => void;
-	autoComplete: string;
-	describedBy?: string;
-	invalid?: boolean;
-}) {
-	const { t } = useTranslation();
-	const [visible, setVisible] = useState(false);
-	return (
-		<div className="relative">
-			<Input
-				id={id}
-				type={visible ? "text" : "password"}
-				autoComplete={autoComplete}
-				value={value}
-				onChange={(e) => onChange(e.target.value)}
-				aria-describedby={describedBy}
-				aria-invalid={invalid || undefined}
-				className="h-12 pr-12"
-			/>
-			<button
-				type="button"
-				onClick={() => setVisible((v) => !v)}
-				aria-label={visible ? t("auth.hidePassword") : t("auth.showPassword")}
-				aria-pressed={visible}
-				className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-			>
-				{visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-			</button>
-		</div>
 	);
 }
 

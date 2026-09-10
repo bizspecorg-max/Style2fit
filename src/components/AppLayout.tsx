@@ -117,7 +117,7 @@ export const AppLayout = () => {
 	const account = useAccount();
 
 	return (
-		<div className="min-h-dvh bg-background md:pl-64">
+		<div className="min-h-dvh bg-background md:pl-64 print:!pl-0">
 			<a
 				href="#main"
 				className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-card focus:px-4 focus:py-2 focus:shadow-lg"
@@ -126,7 +126,7 @@ export const AppLayout = () => {
 			</a>
 
 			{/* Sidebar — desktop */}
-			<aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex">
+			<aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex print:!hidden">
 				<div className="flex px-6 py-6">
 					<Logo on="dark" size="md" />
 				</div>
@@ -159,7 +159,7 @@ export const AppLayout = () => {
 			</aside>
 
 			{/* Top bar — phone */}
-			<header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75 md:hidden">
+			<header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75 md:hidden print:!hidden">
 				<div className="flex h-14 items-center justify-between px-4">
 					<Link to="/" aria-label={t("nav.home")} className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
 						<Logo size="sm" />
@@ -184,7 +184,7 @@ export const AppLayout = () => {
 			{/* Bottom navigation — phone */}
 			<nav
 				aria-label={t("nav.main")}
-				className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+				className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden print:!hidden"
 			>
 				<div className="grid h-16 grid-cols-5">
 					<BottomLink item={WORKSPACE[0]} />

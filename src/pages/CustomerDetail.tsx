@@ -360,13 +360,17 @@ const CustomerDetail = () => {
 						<div className="rounded-2xl border border-dashed bg-card p-8 text-center">
 							<p className="text-sm text-muted-foreground">{t("customers.noOrders")}</p>
 							<Button variant="outline" className="mt-4" asChild>
-								<Link to="/orders?new=1">{t("customers.newOrder")}</Link>
+								<Link to={`/orders/new?customer=${customer.id}`}>{t("customers.newOrder")}</Link>
 							</Button>
 						</div>
 					) : (
 						<ul className="divide-y overflow-hidden rounded-2xl border bg-card">
 							{data.orders.map((o) => (
-								<li key={o.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3">
+								<li key={o.id}>
+									<Link
+										to={`/orders/${o.id}`}
+										className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none"
+									>
 									<span className="font-mono text-xs">{o.code}</span>
 									<span className="min-w-0 flex-1 truncate font-medium">{o.styles?.name ?? "—"}</span>
 									<Badge variant="secondary" className={`capitalize ${STATUS_TONE[o.status] ?? ""}`}>
@@ -376,6 +380,7 @@ const CustomerDetail = () => {
 										{t("customers.due", { date: formatDate(o.delivery_date, shop.locale) })}
 									</span>
 									<span className="text-sm font-semibold tabular-nums">{formatMoney(o.price, shop.currency, shop.locale)}</span>
+									</Link>
 								</li>
 							))}
 						</ul>
