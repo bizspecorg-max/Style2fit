@@ -29,19 +29,20 @@
     <meta property="twitter:description" content="Digital measurement book for modern tailors. Manage everything from one dashboard." />
     <meta property="twitter:image" content="https://res.cloudinary.com/dfmigbgri/image/upload/v1778104802/Screenshot_2026-05-06_225849_lo3l9p.png" />
 
-    <!-- Favicon (using your brand logo) -->
-    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dfmigbgri/image/upload/v1778104802/Screenshot_2026-05-06_225849_lo3l9p.png" />
-    <link rel="shortcut icon" type="https://res.cloudinary.com/dfmigbgri/image/upload/v1778104802/Screenshot_2026-05-06_225849_lo3l9p.png" />
-    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dfmigbgri/image/upload/v1778104802/Screenshot_2026-05-06_225849_lo3l9p.png" />
+    <!-- Favicon: the gold S2F mark on brand emerald (served small by Cloudinary) -->
+    <link rel="icon" type="image/png" sizes="64x64" href="https://res.cloudinary.com/dfmigbgri/image/upload/c_crop,x_300,y_620,w_1780,h_1080/e_trim/c_pad,ar_1:1,w_64,b_rgb:114b36,f_png/v1778103874/Stlye_2fit_rxojiu.png" />
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dfmigbgri/image/upload/c_crop,x_300,y_620,w_1780,h_1080/e_trim/c_pad,ar_1:1,w_180,b_rgb:114b36,f_png/v1778103874/Stlye_2fit_rxojiu.png" />
 
-    <!-- Theme Color (optional, matches your brand) -->
-    <meta name="theme-color" content="#3b82f6" />
+    <meta name="theme-color" content="#114b36" />
 
-    <!-- Preconnect to external domains for performance -->
+    <!-- Connect early to the servers every screen needs -->
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
     <link rel="preconnect" href="https://res.cloudinary.com" />
-    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fonts load without blocking the page (text shows immediately, then swaps) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&display=swap" /></noscript>
   </head>
 
   <body>

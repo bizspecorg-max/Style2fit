@@ -1,380 +1,195 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { z } from "zod";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
+import { MoreVertical, Pencil, Plus, Ruler, Search, Shirt, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { StyleDialog } from "@/components/StyleDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-	DialogFooter,
-} from "@/components/ui/dialog";
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import {
-	Plus,
-	Pencil,
-	Trash2,
-	Image as ImgIcon,
-	X,
-	Ruler,
-	Loader2,
-} from "lucide-react";
-import { toast } from "sonner";
-import {
-	CATEGORIES,
-	Category,
-	TEMPLATES,
-	MeasurementField,
-	newField,
-} from "@/lib/measurementTemplates";
-import { uploadToCloudinary, cloudinaryConfigured } from "@/lib/cloudinary";
-
-type Style = {
-	id: string;
-	name: string;
-	category: string;
-	image_url: string | null;
-	measurement_template: MeasurementField[];
-};
-
-const schema = z.object({
-	name: z.string().trim().min(1).max(100),
-	category: z.string().min(1),
-});
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { fieldsForStyle } from "@/lib/orders";
+import { useStyles, type StyleRow } from "@/lib/styles";
+import { cn } from "@/lib/utils";
 
 const Styles = () => {
-	const { user } = useAuth();
-	const navigate = useNavigate();
-	const [items, setItems] = useState<Style[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [open, setOpen] = useState(false);
-	const [editing, setEditing] = useState<Style | null>(null);
-
-	const [name, setName] = useState("");
-	const [category, setCategory] = useState<Category>("Shirt");
-	const [imageUrl, setImageUrl] = useState<string | null>(null);
-	const [uploading, setUploading] = useState(false);
-	const [fields, setFields] = useState<MeasurementField[]>(TEMPLATES["Shirt"]);
+	const { t } = useTranslation();
+	const queryClient = useQueryClient();
+	const { data: styles = [], isLoading, isError, refetch } = useStyles();
+	const [q, setQ] = useState("");
+	const [category, setCategory] = useState("all");
+	const [dialog, setDialog] = useState<{ open: boolean; style: StyleRow | null }>({ open: false, style: null });
+	const [deleting, setDeleting] = useState<StyleRow | null>(null);
 
 	useEffect(() => {
-		document.title = "Styles · Style2Fit";
-	}, []);
+		document.title = `${t("nav.styles")} · Style2Fit`;
+	}, [t]);
 
-	const load = async () => {
-		setLoading(true);
-		const { data } = await supabase
-			.from("styles")
-			.select("*")
-			.order("created_at", { ascending: false });
-		setItems((data as unknown as Style[]) ?? []);
-		setLoading(false);
-	};
-	useEffect(() => {
-		if (user) load();
-	}, [user]);
+	const categories = useMemo(() => [...new Set(styles.map((s) => s.category))].sort(), [styles]);
+	const filtered = useMemo(() => {
+		const s = q.trim().toLowerCase();
+		return styles.filter((st) => (category === "all" || st.category === category) && (!s || st.name.toLowerCase().includes(s)));
+	}, [styles, q, category]);
 
-	const openNew = () => {
-		setEditing(null);
-		setName("");
-		setCategory("Shirt");
-		setImageUrl(null);
-		setFields(TEMPLATES["Shirt"]);
-		setOpen(true);
-	};
-	const openEdit = (s: Style) => {
-		setEditing(s);
-		setName(s.name);
-		setCategory(s.category as Category);
-		setImageUrl(s.image_url);
-		setFields(
-			s.measurement_template?.length
-				? s.measurement_template
-				: (TEMPLATES[s.category as Category] ?? [])
-		);
-		setOpen(true);
-	};
+	const refresh = () => queryClient.invalidateQueries({ queryKey: ["styles"] });
 
-	const onCategoryChange = (val: string) => {
-		setCategory(val as Category);
-		if (!editing) setFields(TEMPLATES[val as Category] ?? []);
-	};
-
-	const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
-		if (!cloudinaryConfigured) {
-			toast.error(
-				"Cloudinary not configured yet. Add your cloud name + preset."
-			);
-			return;
-		}
-		setUploading(true);
-		try {
-			setImageUrl(await uploadToCloudinary(file));
-			toast.success("Image uploaded");
-		} catch (err) {
-			toast.error((err as Error).message);
-		} finally {
-			setUploading(false);
-		}
-	};
-
-	const save = async (e: React.FormEvent) => {
-		e.preventDefault();
-		const parsed = schema.safeParse({ name, category });
-		if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-		const cleanFields = fields.filter((f) => f.label.trim().length > 0);
-		const payload = {
-			name,
-			category,
-			image_url: imageUrl,
-			measurement_template: cleanFields,
-		};
-		if (editing) {
-			const { error } = await supabase
-				.from("styles")
-				.update(payload)
-				.eq("id", editing.id);
-			if (error) return toast.error(error.message);
-			toast.success("Style updated");
-		} else {
-			const { error } = await supabase
-				.from("styles")
-				.insert({ ...payload, user_id: user!.id });
-			if (error) return toast.error(error.message);
-			toast.success("Style created");
-		}
-		setOpen(false);
-		load();
-	};
-
-	const remove = async (id: string) => {
-		if (!confirm("Delete this style?")) return;
-		const { error } = await supabase.from("styles").delete().eq("id", id);
-		if (error) return toast.error(error.message);
-		toast.success("Deleted");
-		load();
+	const remove = async () => {
+		if (!deleting) return;
+		const { error } = await supabase.from("styles").delete().eq("id", deleting.id);
+		setDeleting(null);
+		if (error) return toast.error(error.code === "23503" ? t("styles.inUse") : error.message);
+		toast.success(t("styles.deleted"));
+		refresh();
 	};
 
 	return (
-		<div className="space-y-5 p-4 md:p-6">
-			<header className="flex items-center justify-between gap-3">
+		<div className="space-y-5">
+			<header className="flex items-end justify-between gap-3">
 				<div>
-					<h1 className="font-display text-3xl font-bold">Styles</h1>
-					<p className="text-sm text-muted-foreground">{items.length} total</p>
+					<h1 className="font-display text-3xl font-bold">{t("nav.styles")}</h1>
+					<p className="text-sm text-muted-foreground">{t("styles.count", { count: styles.length })}</p>
 				</div>
-				<Button onClick={openNew} className="h-11">
-					<Plus className="h-4 w-4 mr-1.5" /> New style
+				<Button className="h-11" onClick={() => setDialog({ open: true, style: null })}>
+					<Plus className="h-4 w-4" />
+					{t("styles.new")}
 				</Button>
 			</header>
 
-			{loading ? (
-				<p className="text-sm text-muted-foreground">Loading…</p>
-			) : items.length === 0 ? (
-				<Card className="p-10 text-center">
-					<p className="text-sm text-muted-foreground">
-						No styles yet. Create your first one.
-					</p>
-				</Card>
-			) : (
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-					{items.map((s) => (
-						<Card
-							key={s.id}
-							className="overflow-hidden border-border/70 group flex flex-col"
-						>
-							{/* Image section with fixed height */}
-							<div className="relative aspect-square bg-muted">
-								{s.image_url ? (
-									<img
-										src={s.image_url}
-										alt={s.name}
-										loading="lazy"
-										className="h-full w-full object-cover"
-									/>
-								) : (
-									<div className="h-full w-full flex items-center justify-center text-muted-foreground">
-										<ImgIcon className="h-10 w-10" />
-									</div>
-								)}
-								<div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition">
-									<Button
-										size="icon"
-										variant="secondary"
-										className="h-8 w-8"
-										onClick={() => openEdit(s)}
-									>
-										<Pencil className="h-3.5 w-3.5" />
-									</Button>
-									<Button
-										size="icon"
-										variant="secondary"
-										className="h-8 w-8"
-										onClick={() => remove(s.id)}
-									>
-										<Trash2 className="h-3.5 w-3.5 text-destructive" />
-									</Button>
-								</div>
-							</div>
-
-							{/* Content area with flexible layout */}
-							<div className="p-4 flex flex-col flex-1">
-								<div className="flex-1">
-									<div className="font-semibold truncate text-base">
-										{s.name}
-									</div>
-									<div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">
-										{s.category}
-									</div>
-								</div>
-								<Button
-									size="sm"
-									variant="outline"
-									className="w-full mt-4 h-9"
-									onClick={() => navigate(`/orders?style=${s.id}&new=1`)}
+			{styles.length > 0 && (
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+					<div className="relative flex-1">
+						<Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+						<Input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("styles.search")} aria-label={t("styles.search")} className="h-12 pl-9" />
+					</div>
+					{categories.length > 1 && (
+						<div className="-mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0" role="group" aria-label={t("styles.category")}>
+							{["all", ...categories].map((c) => (
+								<button
+									key={c}
+									type="button"
+									aria-pressed={category === c}
+									onClick={() => setCategory(c)}
+									className={cn(
+										"h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+										category === c ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:bg-muted"
+									)}
 								>
-									<Ruler className="h-3.5 w-3.5 mr-1.5" /> Take measurement
-								</Button>
-							</div>
-						</Card>
-					))}
+									{c === "all" ? t("orders.all") : c}
+								</button>
+							))}
+						</div>
+					)}
 				</div>
 			)}
 
-			<Dialog open={open} onOpenChange={setOpen}>
-				<DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-					<DialogHeader>
-						<DialogTitle>{editing ? "Edit style" : "New style"}</DialogTitle>
-					</DialogHeader>
-					<form onSubmit={save} className="space-y-4">
-						<div className="space-y-1.5">
-							<Label htmlFor="name">Style name *</Label>
-							<Input
-								id="name"
-								value={name}
-								onChange={(e) => setName(e.target.value)}
-								className="h-11"
-								required
-							/>
-						</div>
-						<div className="space-y-1.5">
-							<Label>Category *</Label>
-							<Select value={category} onValueChange={onCategoryChange}>
-								<SelectTrigger className="h-11">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{CATEGORIES.map((c) => (
-										<SelectItem key={c} value={c}>
-											{c}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div className="space-y-1.5">
-							<Label>Image</Label>
-							<div className="flex items-center gap-3">
-								<label className="flex-1 flex items-center justify-center h-24 border-2 border-dashed border-border rounded-xl cursor-pointer hover:bg-muted/50 transition relative overflow-hidden">
-									{imageUrl ? (
-										<img
-											src={imageUrl}
-											alt=""
-											className="absolute inset-0 h-full w-full object-cover"
-										/>
-									) : uploading ? (
-										<Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-									) : (
-										<span className="text-xs text-muted-foreground flex items-center gap-1.5">
-											<ImgIcon className="h-4 w-4" /> Upload image
-										</span>
-									)}
-									<input
-										type="file"
-										accept="image/*"
-										className="hidden"
-										onChange={onFile}
-									/>
-								</label>
-								{imageUrl && (
-									<Button
-										type="button"
-										variant="ghost"
-										size="icon"
-										onClick={() => setImageUrl(null)}
-									>
-										<X className="h-4 w-4" />
-									</Button>
+			{isLoading ? (
+				<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4" role="status" aria-label={t("common.loading")}>
+					{[0, 1, 2, 3].map((i) => (
+						<Skeleton key={i} className="aspect-[4/5] rounded-2xl" />
+					))}
+				</div>
+			) : isError ? (
+				<div className="rounded-2xl border bg-card p-8 text-center">
+					<p className="text-sm text-muted-foreground">{t("common.loadError")}</p>
+					<Button variant="outline" className="mt-4" onClick={() => refetch()}>
+						{t("common.retry")}
+					</Button>
+				</div>
+			) : styles.length === 0 ? (
+				<div className="flex flex-col items-center rounded-2xl border border-dashed bg-card px-6 py-12 text-center">
+					<span className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-soft text-primary">
+						<Shirt className="h-6 w-6" aria-hidden />
+					</span>
+					<h2 className="mt-4 font-display text-xl font-bold">{t("styles.emptyTitle")}</h2>
+					<p className="mt-1 max-w-sm text-sm text-muted-foreground">{t("styles.emptyBody")}</p>
+					<Button className="mt-6 h-11" onClick={() => setDialog({ open: true, style: null })}>
+						<Plus className="h-4 w-4" />
+						{t("styles.first")}
+					</Button>
+				</div>
+			) : filtered.length === 0 ? (
+				<p className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">{t("styles.noMatch")}</p>
+			) : (
+				<ul className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+					{filtered.map((s) => (
+						<li key={s.id} className="flex flex-col overflow-hidden rounded-2xl border bg-card">
+							<div className="relative aspect-[4/5] bg-muted">
+								{s.image_url ? (
+									<img src={s.image_url} alt={s.name} loading="lazy" className="h-full w-full object-cover" />
+								) : (
+									<div className="flex h-full items-center justify-center">
+										<Shirt className="h-10 w-10 text-muted-foreground" aria-hidden />
+									</div>
 								)}
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button variant="secondary" size="icon" className="absolute right-2 top-2 h-9 w-9 rounded-full shadow-sm" aria-label={t("styles.actions", { name: s.name })}>
+											<MoreVertical className="h-4 w-4" />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="end">
+										<DropdownMenuItem onSelect={() => setDialog({ open: true, style: s })}>
+											<Pencil className="mr-2 h-4 w-4" />
+											{t("common.edit")}
+										</DropdownMenuItem>
+										<DropdownMenuSeparator />
+										<DropdownMenuItem onSelect={() => setDeleting(s)} className="text-destructive focus:text-destructive">
+											<Trash2 className="mr-2 h-4 w-4" />
+											{t("styles.delete")}
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</div>
-							{!cloudinaryConfigured && (
-								<p className="text-[11px] text-warning">
-									Add Cloudinary cloud name + preset to enable uploads.
+							<div className="flex flex-1 flex-col p-3 sm:p-4">
+								<h2 className="truncate font-semibold">{s.name}</h2>
+								<p className="text-xs uppercase tracking-wide text-muted-foreground">{s.category}</p>
+								<p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
+									<Ruler className="h-3 w-3" aria-hidden />
+									{t("styles.fieldCount", { count: fieldsForStyle(s).length })}
 								</p>
-							)}
-						</div>
-
-						<div className="space-y-2">
-							<div className="flex items-center justify-between">
-								<Label>Measurement fields</Label>
-								<Button
-									type="button"
-									size="sm"
-									variant="ghost"
-									onClick={() => setFields([...fields, newField("")])}
-								>
-									<Plus className="h-3.5 w-3.5 mr-1" /> Add field
+								<Button variant="outline" size="sm" className="mt-3 h-10 w-full" asChild>
+									<Link to={`/orders/new?style=${s.id}`}>{t("nav.newOrder")}</Link>
 								</Button>
 							</div>
-							<div className="space-y-2">
-								{fields.map((f, i) => (
-									<div key={f.key} className="flex gap-2">
-										<Input
-											value={f.label}
-											onChange={(e) => {
-												const next = [...fields];
-												next[i] = { ...f, label: e.target.value };
-												setFields(next);
-											}}
-											placeholder="e.g. Chest"
-											className="h-10"
-										/>
-										<Button
-											type="button"
-											size="icon"
-											variant="ghost"
-											onClick={() =>
-												setFields(fields.filter((_, idx) => idx !== i))
-											}
-										>
-											<X className="h-4 w-4" />
-										</Button>
-									</div>
-								))}
-							</div>
-						</div>
+						</li>
+					))}
+				</ul>
+			)}
 
-						<DialogFooter>
-							<Button type="submit" className="w-full sm:w-auto">
-								{editing ? "Save changes" : "Create style"}
-							</Button>
-						</DialogFooter>
-					</form>
-				</DialogContent>
-			</Dialog>
+			<StyleDialog open={dialog.open} style={dialog.style} onOpenChange={(open) => setDialog((d) => ({ ...d, open }))} onSaved={refresh} />
+
+			<AlertDialog open={!!deleting} onOpenChange={(open) => !open && setDeleting(null)}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>{t("styles.deleteTitle", { name: deleting?.name })}</AlertDialogTitle>
+						<AlertDialogDescription>{t("styles.deleteBody")}</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+						<AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={remove}>
+							{t("styles.delete")}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 };
