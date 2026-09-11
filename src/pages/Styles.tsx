@@ -23,7 +23,6 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { displayUrl } from "@/lib/discover";
 import type { Category } from "@/lib/measurementTemplates";
 import { fieldsForStyle } from "@/lib/orders";
 import { useStyles, type StyleRow } from "@/lib/styles";
@@ -220,7 +219,7 @@ const Styles = () => {
 							setDialog({
 								open: true,
 								style: null,
-								initial: { name: topic?.label ?? "", category: topic?.category ?? "Other", image_url: displayUrl(image) },
+								initial: { name: topic?.label ?? "", category: topic?.category ?? "Other", image_url: image.large },
 							})
 						}
 					/>

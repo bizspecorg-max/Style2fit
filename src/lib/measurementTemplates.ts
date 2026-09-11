@@ -10,6 +10,7 @@ export const CATEGORIES = [
   "Suit",
   "Gown",
   "Buba & Iro",
+  "Jumpsuit",
   "Other",
 ] as const;
 
@@ -31,6 +32,7 @@ export const TEMPLATES: Record<Category, MeasurementField[]> = {
   Suit: make(["Chest", "Shoulder", "Sleeve", "Jacket Length", "Waist", "Trouser Length"]),
   Gown: make(["Bust", "Underbust", "Waist", "Hip", "Full Length", "Sleeve"]),
   "Buba & Iro": make(["Bust", "Shoulder", "Sleeve", "Buba Length", "Iro Length"]),
+  Jumpsuit: make(["Bust", "Waist", "Hip", "Shoulder", "Sleeve", "Full Length", "Inseam", "Crotch"]),
   Other: make(["Measurement 1", "Measurement 2"]),
 };
 

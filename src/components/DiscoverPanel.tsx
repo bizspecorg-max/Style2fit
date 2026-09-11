@@ -1,80 +1,118 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ExternalLink, Loader2, Plus, Search } from "lucide-react";
+import { ExternalLink, Loader2, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/responsive-dialog";
-import { RateLimitError, TOPICS, displayUrl, gridUrl, licenseLabel, useDiscover, type DiscoverImage, type Topic } from "@/lib/discover";
+import { GROUPS, TOPICS, useDiscover, type DiscoverImage, type Group, type Topic } from "@/lib/discover";
 import { cn } from "@/lib/utils";
 
 function Credit({ image }: { image: DiscoverImage }) {
 	const { t } = useTranslation();
-	const license = licenseLabel(image);
-	const source = image.source.replace(/_/g, " ");
-	return <>{image.creator ? t("styles.discover.credit", { creator: image.creator, license, source }) : t("styles.discover.creditNoName", { license, source })}</>;
+	const source = "Wikimedia Commons";
+	return <>{image.creator ? t("styles.discover.credit", { creator: image.creator, license: image.license, source }) : t("styles.discover.creditNoName", { license: image.license, source })}</>;
 }
 
-/** Browse openly licensed outfit photos; saving one hands its link to the style form. */
+/** Browse real outfit photos by who wears them and what they are; saving one hands its link to the style form. */
 export function DiscoverPanel({ onSave }: { onSave: (image: DiscoverImage, topic: Topic | null) => void }) {
 	const { t } = useTranslation();
-	const [topic, setTopic] = useState<Topic | null>(TOPICS[0]);
+	const [group, setGroup] = useState<Group>("women");
+	const [topic, setTopic] = useState<Topic>(TOPICS[0]);
 	const [input, setInput] = useState("");
-	const [query, setQuery] = useState(TOPICS[0].query);
+	const [search, setSearch] = useState("");
 	const [viewing, setViewing] = useState<DiscoverImage | null>(null);
-	// Photos load from their source first; if that fails, Openverse's thumbnail; if that fails too, they're hidden.
-	const [fallback, setFallback] = useState<Set<string>>(() => new Set());
 	const [broken, setBroken] = useState<Set<string>>(() => new Set());
-	const [viewerFallback, setViewerFallback] = useState(false);
-	const onImageError = (id: string) => {
-		if (!fallback.has(id)) setFallback((f) => new Set(f).add(id));
-		else setBroken((b) => new Set(b).add(id));
-	};
-	const { data, isLoading, isError, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useDiscover(query);
+	const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useDiscover(search ? { kind: "search", query: search } : { kind: "topic", topic });
 
+	const groups = GROUPS.filter((g) => TOPICS.some((tp) => tp.group === g.key));
+	const topics = TOPICS.filter((tp) => tp.group === group);
 	const images = useMemo(() => {
 		const seen = new Set<string>();
-		return (data?.pages.flatMap((p) => p.results) ?? []).filter((img) => !broken.has(img.id) && !seen.has(img.id) && seen.add(img.id));
+		return (data?.pages.flatMap((p) => p.images) ?? []).filter((img) => !broken.has(img.id) && !seen.has(img.id) && seen.add(img.id));
 	}, [data, broken]);
 
-	const chooseTopic = (next: Topic) => {
-		setTopic(next);
+	// Some categories have many small or panoramic files we skip; keep loading until the first screen is full.
+	useEffect(() => {
+		if (!isLoading && !isError && hasNextPage && !isFetchingNextPage && images.length < 12) fetchNextPage();
+	}, [isLoading, isError, hasNextPage, isFetchingNextPage, images.length, fetchNextPage]);
+
+	const chooseGroup = (next: Group) => {
+		setGroup(next);
+		setSearch("");
 		setInput("");
-		setQuery(next.query);
+		setTopic(TOPICS.find((tp) => tp.group === next) ?? TOPICS[0]);
+	};
+	const chooseTopic = (next: Topic) => {
+		setSearch("");
+		setInput("");
+		setTopic(next);
 	};
 
 	return (
 		<div className="space-y-4">
 			<p className="text-sm leading-relaxed text-muted-foreground">{t("styles.discover.intro")}</p>
-			<form
-				role="search"
-				className="relative"
-				onSubmit={(e) => {
-					e.preventDefault();
-					if (!input.trim()) return;
-					setTopic(null);
-					setQuery(input.trim());
-				}}
-			>
-				<Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-				<Input type="search" value={input} onChange={(e) => setInput(e.target.value)} placeholder={t("styles.discover.search")} aria-label={t("styles.discover.search")} className="h-12 rounded-full bg-card pl-11 shadow-card" />
-			</form>
+
+			<div className="grid grid-cols-4 gap-1 rounded-full bg-muted p-1" role="tablist" aria-label={t("styles.discover.for")}>
+				{groups.map((g) => (
+					<button
+						key={g.key}
+						type="button"
+						role="tab"
+						aria-selected={!search && group === g.key}
+						onClick={() => chooseGroup(g.key)}
+						className={cn(
+							"h-10 rounded-full text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+							!search && group === g.key ? "bg-card text-foreground shadow-card" : "text-muted-foreground hover:text-foreground"
+						)}
+					>
+						{g.label}
+					</button>
+				))}
+			</div>
+
 			<div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:px-0" role="group" aria-label={t("styles.category")}>
-				{TOPICS.map((tp) => (
+				{topics.map((tp) => (
 					<button
 						key={tp.key}
 						type="button"
-						aria-pressed={topic?.key === tp.key}
+						aria-pressed={!search && topic.key === tp.key}
 						onClick={() => chooseTopic(tp)}
 						className={cn(
 							"h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-							topic?.key === tp.key ? "border-primary bg-primary text-primary-foreground shadow-card" : "bg-card hover:border-primary/30"
+							!search && topic.key === tp.key ? "border-primary bg-primary text-primary-foreground shadow-card" : "bg-card hover:border-primary/30"
 						)}
 					>
 						{tp.label}
 					</button>
 				))}
 			</div>
+
+			<form
+				role="search"
+				className="relative"
+				onSubmit={(e) => {
+					e.preventDefault();
+					setSearch(input.trim());
+				}}
+			>
+				<Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+				<Input type="search" value={input} onChange={(e) => setInput(e.target.value)} placeholder={t("styles.discover.search")} aria-label={t("styles.discover.search")} className="h-12 rounded-full bg-card pl-11 pr-11 shadow-card" />
+				{search && (
+					<button
+						type="button"
+						onClick={() => {
+							setSearch("");
+							setInput("");
+						}}
+						aria-label={t("styles.discover.clearSearch")}
+						className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+					>
+						<X className="h-4 w-4" />
+					</button>
+				)}
+			</form>
+			{search && <p className="text-sm text-muted-foreground">{t("styles.discover.resultsFor", { q: search })}</p>}
 
 			{isLoading ? (
 				<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" role="status" aria-label={t("common.loading")}>
@@ -84,7 +122,7 @@ export function DiscoverPanel({ onSave }: { onSave: (image: DiscoverImage, topic
 				</div>
 			) : isError ? (
 				<div className="rounded-3xl border bg-card p-8 text-center">
-					<p className="text-sm text-muted-foreground">{error instanceof RateLimitError ? t("styles.discover.rateLimited") : t("styles.discover.error")}</p>
+					<p className="text-sm text-muted-foreground">{t("styles.discover.error")}</p>
 					<Button variant="outline" className="mt-4 rounded-full" onClick={() => refetch()}>
 						{t("common.retry")}
 					</Button>
@@ -99,17 +137,16 @@ export function DiscoverPanel({ onSave }: { onSave: (image: DiscoverImage, topic
 							<li key={img.id} className="mb-3 break-inside-avoid">
 								<button
 									type="button"
-									onClick={() => {
-										setViewerFallback(false);
-										setViewing(img);
-									}}
+									onClick={() => setViewing(img)}
 									className="group relative block w-full overflow-hidden rounded-2xl bg-muted shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 								>
 									<img
-										src={fallback.has(img.id) ? img.thumbnail : gridUrl(img)}
+										src={img.thumb}
 										alt={img.title}
 										loading="lazy"
-										onError={() => onImageError(img.id)}
+										onError={() => setBroken((b) => new Set(b).add(img.id))}
+										// Reserve the photo's shape so the grid doesn't jump while it loads (very tall ones are cropped).
+										style={{ aspectRatio: `${img.width} / ${Math.min(img.height, img.width * 1.6)}` }}
 										className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
 									/>
 									<span className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-foreground opacity-0 shadow-card transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" aria-hidden>
@@ -130,7 +167,7 @@ export function DiscoverPanel({ onSave }: { onSave: (image: DiscoverImage, topic
 				</>
 			)}
 			<p className="text-center text-xs text-muted-foreground">
-				<a href="https://openverse.org" target="_blank" rel="noreferrer" className="underline-offset-4 hover:underline">
+				<a href="https://commons.wikimedia.org" target="_blank" rel="noreferrer" className="underline-offset-4 hover:underline">
 					{t("styles.discover.poweredBy")}
 				</a>
 			</p>
@@ -140,17 +177,12 @@ export function DiscoverPanel({ onSave }: { onSave: (image: DiscoverImage, topic
 					{viewing && (
 						<>
 							<DialogHeader>
-								<DialogTitle className="line-clamp-2 text-xl">{viewing.title}</DialogTitle>
+								<DialogTitle className="line-clamp-2 text-xl">{search ? search : topic.label}</DialogTitle>
 								<DialogDescription>
 									<Credit image={viewing} />
 								</DialogDescription>
 							</DialogHeader>
-							<img
-								src={viewerFallback ? viewing.thumbnail : displayUrl(viewing)}
-								alt={viewing.title}
-								onError={() => setViewerFallback(true)}
-								className="max-h-[55dvh] w-full rounded-2xl bg-muted object-contain"
-							/>
+							<img src={viewing.large} alt={viewing.title} className="max-h-[55dvh] w-full rounded-2xl bg-muted object-contain" />
 							<DialogFooter className="gap-2 sm:gap-0">
 								<Button variant="outline" className="rounded-full" asChild>
 									<a href={viewing.landingUrl} target="_blank" rel="noreferrer">
@@ -161,7 +193,7 @@ export function DiscoverPanel({ onSave }: { onSave: (image: DiscoverImage, topic
 								<Button
 									className="rounded-full"
 									onClick={() => {
-										onSave(viewing, topic);
+										onSave(viewing, search ? null : topic);
 										setViewing(null);
 									}}
 								>

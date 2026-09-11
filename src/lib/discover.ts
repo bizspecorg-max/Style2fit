@@ -1,113 +1,175 @@
-// Style inspiration from Openverse (openly licensed images from Wikimedia, Flickr and others).
-// Nothing is copied to our storage: saving a find keeps only its link, name and type in the tailor's styles.
+// Style inspiration from Wikimedia Commons. Volunteers sort its photos into clothing categories
+// ("Agbada", "Brides of Nigeria", "Ankara style clothes in Nigeria"…), so every topic shows real outfits
+// rather than whatever a keyword happens to match. No API key; CORS via origin=*.
+// Nothing is copied to our storage: saving a photo keeps only its link, a name and a type.
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { Category } from "@/lib/measurementTemplates";
 
 export type DiscoverImage = {
 	id: string;
 	title: string;
-	url: string;
-	thumbnail: string;
+	/** ~480px wide — for the grid. */
+	thumb: string;
+	/** ~800px wide — for the viewer and saved as the style's photo. */
+	large: string;
 	creator: string | null;
 	license: string;
-	licenseVersion: string | null;
 	landingUrl: string;
-	source: string;
+	/** Original size — lets the grid reserve each photo's shape before it loads. */
+	width: number;
+	height: number;
 };
 
-export type Topic = { key: string; label: string; query: string; category: Category };
+export type Group = "women" | "men" | "fabrics" | "world";
 
-export const TOPICS: Topic[] = [
-	{ key: "agbada", label: "Agbada", query: "agbada", category: "Agbada" },
-	{ key: "ankara", label: "Ankara dresses", query: "ankara dress", category: "Dress" },
-	{ key: "senator", label: "Senator", query: "senator native wear", category: "Kaftan" },
-	{ key: "dashiki", label: "Dashiki", query: "dashiki", category: "Shirt" },
-	{ key: "kente", label: "Kente", query: "kente fashion", category: "Other" },
-	{ key: "suit", label: "Print suits", query: "african print suit", category: "Suit" },
-	{ key: "skirt", label: "Skirts", query: "african print skirt", category: "Skirt" },
-	{ key: "buba", label: "Buba & Iro", query: "iro and buba", category: "Buba & Iro" },
-	{ key: "kaftan", label: "Kaftan", query: "kaftan african", category: "Kaftan" },
-	{ key: "fashion", label: "African fashion", query: "african fashion", category: "Other" },
+export const GROUPS: { key: Group; label: string }[] = [
+	{ key: "women", label: "Women" },
+	{ key: "men", label: "Men" },
+	{ key: "fabrics", label: "Fabrics" },
+	{ key: "world", label: "Worldwide" },
 ];
 
-/** Ask the source itself for a web-sized copy (Wikimedia originals can be several MB). */
-function sized(url: string, width: 400 | 800) {
-	const wiki = url.match(/^https:\/\/upload\.wikimedia\.org\/wikipedia\/commons\/([0-9a-f]\/[0-9a-f]{2})\/([^/]+)$/);
-	if (wiki) return `https://upload.wikimedia.org/wikipedia/commons/thumb/${wiki[1]}/${wiki[2]}/${width}px-${wiki[2]}`;
-	// Flickr size suffixes: _w = 400px, _c = 800px.
-	const flickr = url.match(/^(https:\/\/live\.staticflickr\.com\/.+?)(?:_[a-z])?\.jpg$/);
-	if (flickr) return `${flickr[1]}_${width === 400 ? "w" : "c"}.jpg`;
-	return url;
-}
-
-/** Small copy for the grid. (Openverse's own thumbnail service is the fallback — it's often unavailable.) */
-export const gridUrl = (image: Pick<DiscoverImage, "url">) => sized(image.url, 400);
-
-/** 800px copy — used for the viewer and saved as the style's photo link. */
-export function displayUrl(image: Pick<DiscoverImage, "url" | "thumbnail">) {
-	const url = sized(image.url, 800);
-	return url.startsWith("https://") ? url : image.thumbnail;
-}
-
-const API = "https://api.openverse.org/v1/images/";
-// Openverse allows at most 20 per page without an API key.
-const PAGE_SIZE = 20;
-
-type ApiImage = {
-	id: string;
-	title: string | null;
-	url: string;
-	thumbnail: string;
-	creator: string | null;
-	license: string;
-	license_version: string | null;
-	foreign_landing_url: string;
-	source: string;
+export type Topic = {
+	key: string;
+	group: Group;
+	label: string;
+	/** Commons categories, shown in this order. */
+	categories: string[];
+	/** Newest uploads first. Off by default: the categories' own order was the one checked for relevance. */
+	newest?: boolean;
+	/** Outfit type used when a photo is saved as a style (sets its measurements). */
+	category: Category;
 };
 
-export class RateLimitError extends Error {}
+// Categories chosen by checking their photos — each is mostly wearable outfits, not events or objects.
+export const TOPICS: Topic[] = [
+	{ key: "ankara", group: "women", label: "Ankara styles", categories: ["Fashion in Africa", "Ankara style clothes in Nigeria"], category: "Dress" },
+	{ key: "lace", group: "women", label: "Lace & couture", categories: ["Lustenau Lagos African Lace (exhibition)"], category: "Gown" },
+	{ key: "bridal", group: "women", label: "Brides & trad wedding", categories: ["Brides of Nigeria", "Wedding clothes of Nigeria"], category: "Gown" },
+	{ key: "buba", group: "women", label: "Buba, Iro & Gele", categories: ["Buba (blouse)"], category: "Buba & Iro" },
+	{ key: "kaftan-women", group: "women", label: "Kaftans & boubou", categories: ["Women wearing kaftans"], category: "Kaftan" },
+	{ key: "jumpsuit", group: "women", label: "Jumpsuits", categories: ["Women wearing jumpsuits", "Playsuit (Women's clothing)"], category: "Jumpsuit", newest: true },
 
-async function searchPage(query: string, page: number) {
-	// Wikimedia and Flickr serve web-sized copies we can link to directly.
-	const params = new URLSearchParams({ q: query, page_size: String(PAGE_SIZE), page: String(page), mature: "false", source: "wikimedia,flickr" });
-	const res = await fetch(`${API}?${params}`);
-	if (res.status === 429) throw new RateLimitError("rate limited");
-	if (!res.ok) throw new Error(`Openverse ${res.status}`);
-	const data = (await res.json()) as { page_count: number; results: ApiImage[] };
-	return {
-		page,
-		pageCount: data.page_count,
-		results: data.results.map<DiscoverImage>((r) => ({
-			id: r.id,
-			title: r.title?.trim() || query,
-			url: r.url,
-			thumbnail: r.thumbnail,
-			creator: r.creator,
-			license: r.license,
-			licenseVersion: r.license_version,
-			landingUrl: r.foreign_landing_url,
-			source: r.source,
-		})),
-	};
-}
+	{ key: "agbada", group: "men", label: "Agbada", categories: ["Agbada"], category: "Agbada" },
+	{ key: "senator", group: "men", label: "Senator & kaftan", categories: ["Hausa traditional wedding and dressing", "Hausa clothing"], category: "Kaftan" },
+	{ key: "native-men", group: "men", label: "Native wear", categories: ["Traditional clothing of Nigeria"], category: "Other" },
+	{ key: "dashiki", group: "men", label: "Dashiki", categories: ["Dashikis"], category: "Shirt" },
+	{ key: "smock", group: "men", label: "Smock (fugu)", categories: ["Ghanaian smocks", "Fashion of Ghana"], category: "Shirt" },
+	{ key: "kanzu", group: "men", label: "Kanzu & blazer", categories: ["Kanzu"], category: "Kaftan" },
 
-/** Paged search; results are cached for the session so browsing back and forth doesn't use up the free quota. */
-export function useDiscover(query: string) {
-	return useInfiniteQuery({
-		queryKey: ["discover", query],
-		enabled: !!query.trim(),
-		initialPageParam: 1,
-		queryFn: ({ pageParam }) => searchPage(query.trim(), pageParam),
-		getNextPageParam: (last) => (last.page < last.pageCount ? last.page + 1 : undefined),
-		staleTime: 1000 * 60 * 60,
-		gcTime: 1000 * 60 * 60,
-		retry: (count, error) => !(error instanceof RateLimitError) && count < 1,
+	{ key: "kente", group: "fabrics", label: "Kente", categories: ["Kente cloth"], category: "Other" },
+	{ key: "kita", group: "fabrics", label: "Pagne kita", categories: ["Pagne kita"], category: "Other" },
+	{ key: "indigo", group: "fabrics", label: "Blue & indigo styles", categories: ["Blue clothing in Nigeria"], category: "Other" },
+
+	{ key: "wedding-gowns", group: "world", label: "Wedding gowns", categories: ["Wedding dresses"], category: "Gown", newest: true },
+	{ key: "suits", group: "world", label: "Suits", categories: ["Men wearing suits", "Three-piece suits"], category: "Suit", newest: true },
+	{ key: "blazers", group: "world", label: "Blazers", categories: ["Blazers"], category: "Suit", newest: true },
+];
+
+const API = "https://commons.wikimedia.org/w/api.php";
+const PAGE_SIZE = "30";
+const IMAGE_INFO = {
+	prop: "imageinfo",
+	iiprop: "url|size|mime|extmetadata",
+	iiurlwidth: "480",
+	iiextmetadatafilter: "Artist|LicenseShortName",
+};
+
+type ImageInfo = {
+	thumburl?: string;
+	url: string;
+	descriptionurl: string;
+	width: number;
+	height: number;
+	mime: string;
+	extmetadata?: Record<string, { value: string } | undefined>;
+};
+type ApiPage = { pageid: number; title: string; imageinfo?: ImageInfo[] };
+type ApiResponse = { query?: { pages?: Record<string, ApiPage> }; continue?: Record<string, string>; error?: { info: string } };
+
+const stripHtml = (html: string) => {
+	const el = document.createElement("div");
+	el.innerHTML = html;
+	return (el.textContent ?? "").replace(/\s+/g, " ").trim();
+};
+
+function toImages(data: ApiResponse): DiscoverImage[] {
+	return Object.values(data.query?.pages ?? {}).flatMap((page) => {
+		const ii = page.imageinfo?.[0];
+		// Photos only (no PDFs, drawings as SVG, video), big enough to see the outfit, and not wide panoramas.
+		if (!ii?.thumburl || !/^image\/(jpeg|png|webp)$/.test(ii.mime)) return [];
+		if (Math.min(ii.width, ii.height) < 500 || ii.width / ii.height > 1.7) return [];
+		const creator = ii.extmetadata?.Artist?.value ? stripHtml(ii.extmetadata.Artist.value).slice(0, 60) : null;
+		return [
+			{
+				id: String(page.pageid),
+				title: page.title.replace(/^File:/, "").replace(/\.[a-z0-9]+$/i, "").replace(/_/g, " "),
+				thumb: ii.thumburl,
+				large: ii.thumburl.includes("/480px-") ? ii.thumburl.replace("/480px-", "/800px-") : ii.thumburl,
+				creator: creator || null,
+				license: ii.extmetadata?.LicenseShortName?.value ?? "",
+				landingUrl: ii.descriptionurl,
+				width: ii.width,
+				height: ii.height,
+			},
+		];
 	});
 }
 
-/** "CC BY-SA 3.0" — "cc0" and "pdm" are public domain. */
-export function licenseLabel(image: Pick<DiscoverImage, "license" | "licenseVersion">) {
-	if (image.license === "cc0") return "CC0";
-	if (image.license === "pdm") return "Public domain";
-	return `CC ${image.license.toUpperCase()}${image.licenseVersion ? ` ${image.licenseVersion}` : ""}`;
+async function call(params: Record<string, string>): Promise<ApiResponse> {
+	const res = await fetch(`${API}?${new URLSearchParams({ action: "query", format: "json", origin: "*", ...params })}`);
+	if (!res.ok) throw new Error(`Commons ${res.status}`);
+	const data = (await res.json()) as ApiResponse;
+	if (data.error) throw new Error(data.error.info);
+	return data;
+}
+
+/** Where the next page comes from: which category in the topic's list, and the API's continue token. */
+type Cursor = { cat: number; cont?: Record<string, string> };
+
+async function topicPage(topic: Topic, cursor: Cursor) {
+	const data = await call({
+		generator: "categorymembers",
+		gcmtitle: `Category:${topic.categories[cursor.cat]}`,
+		gcmtype: "file",
+		gcmlimit: PAGE_SIZE,
+		// Big general categories (wedding gowns, suits) read better newest-first — fewer old archive photos.
+		...(topic.newest ? { gcmsort: "timestamp", gcmdir: "desc" } : {}),
+		...IMAGE_INFO,
+		...(cursor.cont ?? {}),
+	});
+	const next: Cursor | undefined = data.continue
+		? { cat: cursor.cat, cont: data.continue }
+		: cursor.cat + 1 < topic.categories.length
+			? { cat: cursor.cat + 1 }
+			: undefined;
+	return { images: toImages(data), next };
+}
+
+async function searchPage(query: string, cursor: Cursor) {
+	const data = await call({
+		generator: "search",
+		gsrnamespace: "6",
+		// Keep free-text search on clothing photos, not everything that shares the word.
+		gsrsearch: `${query} deepcat:"Clothing of Nigeria" filetype:bitmap`,
+		gsrlimit: PAGE_SIZE,
+		...IMAGE_INFO,
+		...(cursor.cont ?? {}),
+	});
+	return { images: toImages(data), next: data.continue ? { cat: 0, cont: data.continue } : undefined };
+}
+
+export type DiscoverSource = { kind: "topic"; topic: Topic } | { kind: "search"; query: string };
+
+/** Paged photos for a topic or a search; cached for the session so switching back is instant. */
+export function useDiscover(source: DiscoverSource) {
+	return useInfiniteQuery({
+		queryKey: ["discover", source.kind, source.kind === "topic" ? source.topic.key : source.query],
+		initialPageParam: { cat: 0 } as Cursor,
+		queryFn: ({ pageParam }) => (source.kind === "topic" ? topicPage(source.topic, pageParam) : searchPage(source.query, pageParam)),
+		getNextPageParam: (last) => last.next,
+		staleTime: 1000 * 60 * 60,
+		gcTime: 1000 * 60 * 60,
+		retry: 1,
+	});
 }
