@@ -1,6 +1,11 @@
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
+import { fetchCustomers } from "@/lib/customers";
+import { fetchOrders } from "@/lib/orders";
+import { preloadPages } from "@/lib/pages";
+import { fetchStyles } from "@/lib/styles";
 import { ClipboardList, LayoutDashboard, LogOut, Plus, Ruler, Shirt, User, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Logo } from "@/components/Logo";
@@ -112,9 +117,27 @@ function BottomLink({ item }: { item: NavItem }) {
 	);
 }
 
+/** After sign-in, quietly fetch every screen and the main lists so opening any module is instant. */
+function useWarmUp() {
+	const { user } = useAuth();
+	const queryClient = useQueryClient();
+	useEffect(() => {
+		if (!user) return;
+		preloadPages();
+		// A short delay lets the current screen's own requests go first.
+		const timer = setTimeout(() => {
+			queryClient.prefetchQuery({ queryKey: ["customers", user.id], queryFn: fetchCustomers });
+			queryClient.prefetchQuery({ queryKey: ["orders", user.id], queryFn: fetchOrders });
+			queryClient.prefetchQuery({ queryKey: ["styles", user.id], queryFn: fetchStyles });
+		}, 400);
+		return () => clearTimeout(timer);
+	}, [user, queryClient]);
+}
+
 export const AppLayout = () => {
 	const { t } = useTranslation();
 	const account = useAccount();
+	useWarmUp();
 
 	return (
 		<div className="min-h-dvh bg-background md:pl-64 print:!pl-0">
@@ -184,18 +207,18 @@ export const AppLayout = () => {
 			{/* Bottom navigation — phone */}
 			<nav
 				aria-label={t("nav.main")}
-				className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden print:!hidden"
+				className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden print:!hidden"
 			>
 				<div className="grid h-16 grid-cols-5">
 					<BottomLink item={WORKSPACE[0]} />
 					<BottomLink item={WORKSPACE[1]} />
 					<div className="flex items-center justify-center">
 						<Link
-							to="/orders?new=1"
+							to="/orders/new"
 							aria-label={t("nav.newOrder")}
-							className="-mt-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-elevated ring-4 ring-background focus-visible:outline-none focus-visible:ring-accent"
+							className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-soft transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 						>
-							<Plus className="h-6 w-6" />
+							<Plus className="h-5 w-5" />
 						</Link>
 					</div>
 					<BottomLink item={WORKSPACE[2]} />

@@ -2,20 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
-import { MoreVertical, Pencil, Plus, Ruler, Search, Shirt, Trash2 } from "lucide-react";
+import { ClipboardList, MoreHorizontal, Pencil, Plus, Ruler, Search, Shirt, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { StyleDialog } from "@/components/StyleDialog";
+import { EmptyState, PageHeader } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -50,6 +45,7 @@ const Styles = () => {
 	}, [styles, q, category]);
 
 	const refresh = () => queryClient.invalidateQueries({ queryKey: ["styles"] });
+	const openNew = () => setDialog({ open: true, style: null });
 
 	const remove = async () => {
 		if (!deleting) return;
@@ -61,26 +57,26 @@ const Styles = () => {
 	};
 
 	return (
-		<div className="space-y-5">
-			<header className="flex items-end justify-between gap-3">
-				<div>
-					<h1 className="font-display text-3xl font-bold">{t("nav.styles")}</h1>
-					<p className="text-sm text-muted-foreground">{t("styles.count", { count: styles.length })}</p>
-				</div>
-				<Button className="h-11" onClick={() => setDialog({ open: true, style: null })}>
-					<Plus className="h-4 w-4" />
-					{t("styles.new")}
-				</Button>
-			</header>
+		<div className="space-y-6">
+			<PageHeader
+				title={t("nav.styles")}
+				subtitle={t("styles.count", { count: styles.length })}
+				actions={
+					<Button className="h-11 rounded-full px-5" onClick={openNew}>
+						<Plus className="h-4 w-4" />
+						{t("styles.new")}
+					</Button>
+				}
+			/>
 
 			{styles.length > 0 && (
-				<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-					<div className="relative flex-1">
-						<Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-						<Input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("styles.search")} aria-label={t("styles.search")} className="h-12 pl-9" />
+				<div className="space-y-3">
+					<div className="relative">
+						<Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+						<Input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("styles.search")} aria-label={t("styles.search")} className="h-12 rounded-full bg-card pl-11 shadow-card" />
 					</div>
 					{categories.length > 1 && (
-						<div className="-mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0" role="group" aria-label={t("styles.category")}>
+						<div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:px-0" role="group" aria-label={t("styles.category")}>
 							{["all", ...categories].map((c) => (
 								<button
 									key={c}
@@ -88,8 +84,8 @@ const Styles = () => {
 									aria-pressed={category === c}
 									onClick={() => setCategory(c)}
 									className={cn(
-										"h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-										category === c ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:bg-muted"
+										"h-10 shrink-0 rounded-full border px-4 text-sm font-medium capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+										category === c ? "border-primary bg-primary text-primary-foreground shadow-card" : "bg-card hover:border-primary/30"
 									)}
 								>
 									{c === "all" ? t("orders.all") : c}
@@ -101,74 +97,88 @@ const Styles = () => {
 			)}
 
 			{isLoading ? (
-				<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4" role="status" aria-label={t("common.loading")}>
+				<div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4" role="status" aria-label={t("common.loading")}>
 					{[0, 1, 2, 3].map((i) => (
-						<Skeleton key={i} className="aspect-[4/5] rounded-2xl" />
+						<Skeleton key={i} className="aspect-[3/4] rounded-3xl" />
 					))}
 				</div>
 			) : isError ? (
-				<div className="rounded-2xl border bg-card p-8 text-center">
+				<div className="rounded-3xl border bg-card p-8 text-center">
 					<p className="text-sm text-muted-foreground">{t("common.loadError")}</p>
 					<Button variant="outline" className="mt-4" onClick={() => refetch()}>
 						{t("common.retry")}
 					</Button>
 				</div>
 			) : styles.length === 0 ? (
-				<div className="flex flex-col items-center rounded-2xl border border-dashed bg-card px-6 py-12 text-center">
-					<span className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-soft text-primary">
-						<Shirt className="h-6 w-6" aria-hidden />
-					</span>
-					<h2 className="mt-4 font-display text-xl font-bold">{t("styles.emptyTitle")}</h2>
-					<p className="mt-1 max-w-sm text-sm text-muted-foreground">{t("styles.emptyBody")}</p>
-					<Button className="mt-6 h-11" onClick={() => setDialog({ open: true, style: null })}>
-						<Plus className="h-4 w-4" />
-						{t("styles.first")}
-					</Button>
-				</div>
+				<EmptyState
+					icon={Shirt}
+					title={t("styles.emptyTitle")}
+					body={t("styles.emptyBody")}
+					action={
+						<Button className="h-11 rounded-full px-6" onClick={openNew}>
+							<Plus className="h-4 w-4" />
+							{t("styles.first")}
+						</Button>
+					}
+				/>
 			) : filtered.length === 0 ? (
-				<p className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">{t("styles.noMatch")}</p>
+				<p className="rounded-3xl border bg-card p-8 text-center text-sm text-muted-foreground">{t("styles.noMatch")}</p>
 			) : (
-				<ul className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+				<ul className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">
 					{filtered.map((s) => (
-						<li key={s.id} className="flex flex-col overflow-hidden rounded-2xl border bg-card">
-							<div className="relative aspect-[4/5] bg-muted">
-								{s.image_url ? (
-									<img src={s.image_url} alt={s.name} loading="lazy" className="h-full w-full object-cover" />
-								) : (
-									<div className="flex h-full items-center justify-center">
-										<Shirt className="h-10 w-10 text-muted-foreground" aria-hidden />
-									</div>
-								)}
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button variant="secondary" size="icon" className="absolute right-2 top-2 h-9 w-9 rounded-full shadow-sm" aria-label={t("styles.actions", { name: s.name })}>
-											<MoreVertical className="h-4 w-4" />
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end">
-										<DropdownMenuItem onSelect={() => setDialog({ open: true, style: s })}>
-											<Pencil className="mr-2 h-4 w-4" />
-											{t("common.edit")}
-										</DropdownMenuItem>
-										<DropdownMenuSeparator />
-										<DropdownMenuItem onSelect={() => setDeleting(s)} className="text-destructive focus:text-destructive">
-											<Trash2 className="mr-2 h-4 w-4" />
-											{t("styles.delete")}
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</div>
-							<div className="flex flex-1 flex-col p-3 sm:p-4">
-								<h2 className="truncate font-semibold">{s.name}</h2>
-								<p className="text-xs uppercase tracking-wide text-muted-foreground">{s.category}</p>
-								<p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
-									<Ruler className="h-3 w-3" aria-hidden />
-									{t("styles.fieldCount", { count: fieldsForStyle(s).length })}
-								</p>
-								<Button variant="outline" size="sm" className="mt-3 h-10 w-full" asChild>
-									<Link to={`/orders/new?style=${s.id}`}>{t("nav.newOrder")}</Link>
-								</Button>
-							</div>
+						<li key={s.id} className="group relative">
+							<button
+								type="button"
+								onClick={() => setDialog({ open: true, style: s })}
+								className="block w-full overflow-hidden rounded-3xl bg-muted text-left shadow-card transition-shadow duration-300 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+							>
+								<span className="relative block aspect-[3/4]">
+									{s.image_url ? (
+										<img src={s.image_url} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+									) : (
+										<span className="flex h-full items-center justify-center bg-gradient-to-b from-secondary to-muted">
+											<Shirt className="h-10 w-10 text-muted-foreground/60" aria-hidden />
+										</span>
+									)}
+									<span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-3.5 pt-14 text-white sm:p-4 sm:pt-16">
+										<span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">{s.category}</span>
+										<span className="mt-0.5 block truncate font-display text-lg leading-tight">{s.name}</span>
+										<span className="mt-1 inline-flex items-center gap-1 text-xs text-white/75">
+											<Ruler className="h-3 w-3" aria-hidden />
+											{t("styles.fieldCount", { count: fieldsForStyle(s).length })}
+										</span>
+									</span>
+								</span>
+							</button>
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button
+										variant="secondary"
+										size="icon"
+										className="absolute right-2.5 top-2.5 h-9 w-9 rounded-full bg-white/90 text-foreground shadow-card backdrop-blur hover:bg-white"
+										aria-label={t("styles.actions", { name: s.name })}
+									>
+										<MoreHorizontal className="h-4 w-4" />
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end" className="w-56">
+									<DropdownMenuItem asChild>
+										<Link to={`/orders/new?style=${s.id}`}>
+											<ClipboardList className="mr-2 h-4 w-4" />
+											{t("styles.useForOrder")}
+										</Link>
+									</DropdownMenuItem>
+									<DropdownMenuItem onSelect={() => setDialog({ open: true, style: s })}>
+										<Pencil className="mr-2 h-4 w-4" />
+										{t("common.edit")}
+									</DropdownMenuItem>
+									<DropdownMenuSeparator />
+									<DropdownMenuItem onSelect={() => setDeleting(s)} className="text-destructive focus:text-destructive">
+										<Trash2 className="mr-2 h-4 w-4" />
+										{t("styles.delete")}
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
 						</li>
 					))}
 				</ul>
@@ -177,7 +187,7 @@ const Styles = () => {
 			<StyleDialog open={dialog.open} style={dialog.style} onOpenChange={(open) => setDialog((d) => ({ ...d, open }))} onSaved={refresh} />
 
 			<AlertDialog open={!!deleting} onOpenChange={(open) => !open && setDeleting(null)}>
-				<AlertDialogContent>
+				<AlertDialogContent className="rounded-3xl">
 					<AlertDialogHeader>
 						<AlertDialogTitle>{t("styles.deleteTitle", { name: deleting?.name })}</AlertDialogTitle>
 						<AlertDialogDescription>{t("styles.deleteBody")}</AlertDialogDescription>

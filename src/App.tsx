@@ -8,21 +8,22 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
 import { PageFallback } from "@/components/PageFallback";
+import { pages } from "@/lib/pages";
 
-// Each screen downloads only when it's first opened, so the first visit stays small.
-const Auth = lazy(() => import("./pages/Auth"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const Onboarding = lazy(() => import("./pages/Onboarding"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Customers = lazy(() => import("./pages/Customers"));
-const CustomerDetail = lazy(() => import("./pages/CustomerDetail"));
-const NewOrder = lazy(() => import("./pages/NewOrder"));
-const OrderDetail = lazy(() => import("./pages/OrderDetail"));
-const Styles = lazy(() => import("./pages/Styles"));
-const Orders = lazy(() => import("./pages/Orders"));
-const Profile = lazy(() => import("./pages/Profile"));
-const QuickMeasure = lazy(() => import("./pages/QuickMeasure"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+// Each screen is its own small download; AppLayout fetches the rest in the background after sign-in.
+const Auth = lazy(pages.Auth);
+const ResetPassword = lazy(pages.ResetPassword);
+const Onboarding = lazy(pages.Onboarding);
+const Dashboard = lazy(pages.Dashboard);
+const Customers = lazy(pages.Customers);
+const CustomerDetail = lazy(pages.CustomerDetail);
+const NewOrder = lazy(pages.NewOrder);
+const OrderDetail = lazy(pages.OrderDetail);
+const Styles = lazy(pages.Styles);
+const Orders = lazy(pages.Orders);
+const Profile = lazy(pages.Profile);
+const QuickMeasure = lazy(pages.QuickMeasure);
+const NotFound = lazy(pages.NotFound);
 
 // One cache for the whole app: revisiting a screen shows data instantly.
 const queryClient = new QueryClient({

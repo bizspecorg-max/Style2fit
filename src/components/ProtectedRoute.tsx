@@ -1,8 +1,15 @@
+import { lazy, Suspense } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2 } from "lucide-react";
+import { PageFallback } from "@/components/PageFallback";
+import { pages } from "@/lib/pages";
 
-/** Signed-in users only. Accounts without a shop country are sent to onboarding once. */
+const Landing = lazy(pages.Landing);
+
+/**
+ * Signed-in users only. Visitors to "/" see the landing page instead of being sent to sign-in;
+ * accounts without a shop country are sent to onboarding once.
+ */
 export const ProtectedRoute = ({
 	children,
 	requireShop = true,
@@ -13,14 +20,17 @@ export const ProtectedRoute = ({
 	const { user, loading } = useAuth();
 	const location = useLocation();
 
-	if (loading) {
-		return (
-			<div className="flex min-h-screen items-center justify-center bg-background" role="status" aria-label="Loading">
-				<Loader2 className="h-6 w-6 animate-spin text-primary" />
-			</div>
-		);
+	if (loading) return <PageFallback fullScreen />;
+	if (!user) {
+		if (location.pathname === "/") {
+			return (
+				<Suspense fallback={<PageFallback fullScreen />}>
+					<Landing />
+				</Suspense>
+			);
+		}
+		return <Navigate to="/auth" state={{ from: location }} replace />;
 	}
-	if (!user) return <Navigate to="/auth" state={{ from: location }} replace />;
 	if (requireShop && !user.user_metadata?.country) return <Navigate to="/onboarding" replace />;
 	return <>{children}</>;
 };

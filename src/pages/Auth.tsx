@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { AuthError } from "@supabase/supabase-js";
 import { z } from "zod";
@@ -412,7 +412,9 @@ function ForgotPasswordDialog({ open, onOpenChange }: { open: boolean; onOpenCha
 const Auth = () => {
 	const { t } = useTranslation();
 	const { user, loading } = useAuth();
-	const [tab, setTab] = useState<"signin" | "signup">("signin");
+	const [params] = useSearchParams();
+	// "Start free" links arrive with ?mode=signup and open straight on sign-up.
+	const [tab, setTab] = useState<"signin" | "signup">(() => (params.get("mode") === "signup" ? "signup" : "signin"));
 	const [forgotOpen, setForgotOpen] = useState(false);
 
 	useEffect(() => {

@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { findCountry } from "@/lib/countries";
+import { findCountry, fromE164 } from "@/lib/countries";
 import type { MeasureUnit } from "@/lib/countries";
 
 export type Shop = {
@@ -49,6 +49,26 @@ export const initials = (name: string) =>
 		.slice(0, 2)
 		.map((w) => w[0].toLocaleUpperCase())
 		.join("") || "?";
+
+/** "+2348031234501" → "+234 803 123 4501". Numbers not in international form are shown as typed. */
+export function formatPhone(phone: string | null | undefined): string {
+	if (!phone) return "";
+	if (!phone.trim().startsWith("+")) return phone;
+	const { country, national } = fromE164(phone);
+	const dial = findCountry(country).dial;
+	const groups = national.length >= 9 && national.length <= 10 ? [national.slice(0, 3), national.slice(3, 6), national.slice(6)] : national.match(/.{1,3}/g) ?? [national];
+	return `+${dial} ${groups.join(" ")}`;
+}
+
+/** "STF-260910-e1cfa1" → "#E1CFA1" — the part people actually read out. */
+export const shortCode = (code: string) => `#${(code.split("-").pop() ?? code).toUpperCase()}`;
+
+/** Whole days from today to a calendar date ("2026-09-14"); negative when it's past. */
+export function daysUntil(dateIso: string): number {
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	return Math.round((new Date(`${dateIso}T00:00:00`).getTime() - today.getTime()) / 86_400_000);
+}
 
 /** wa.me link for an international number; without a number, WhatsApp lets you pick the chat. */
 export function whatsappLink(phone: string | null | undefined, text?: string): string {
