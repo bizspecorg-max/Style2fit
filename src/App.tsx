@@ -11,6 +11,7 @@ import { PageFallback } from "@/components/PageFallback";
 import { pages } from "@/lib/pages";
 
 // Each screen is its own small download; AppLayout fetches the rest in the background after sign-in.
+const Landing = lazy(pages.Landing);
 const Auth = lazy(pages.Auth);
 const ResetPassword = lazy(pages.ResetPassword);
 const Onboarding = lazy(pages.Onboarding);
@@ -55,6 +56,7 @@ const App = () => (
 				<AuthProvider>
 					<Suspense fallback={<PageFallback fullScreen />}>
 						<Routes>
+							<Route path="/welcome" element={<Landing />} />
 							<Route path="/auth" element={<Auth />} />
 							<Route path="/reset-password" element={<ResetPassword />} />
 							<Route

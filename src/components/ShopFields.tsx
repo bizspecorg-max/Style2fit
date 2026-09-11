@@ -72,7 +72,7 @@ export function ShopFields({
 					value={value.country}
 					// Changing country also picks that country's usual unit (still editable below).
 					onChange={(e) => onChange({ ...value, country: e.target.value, unit: findCountry(e.target.value).unit })}
-					className="h-12 w-full rounded-md border border-input bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					className="h-12 w-full rounded-xl border border-input bg-card px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 				>
 					{countries.map((c) => (
 						<option key={c.code} value={c.code}>
@@ -106,11 +106,11 @@ export function ShopFields({
 						<label
 							key={unit}
 							className={cn(
-								"flex h-12 cursor-pointer items-center justify-center rounded-md border text-sm font-medium transition-colors",
+								"flex h-12 cursor-pointer items-center justify-center rounded-xl border text-sm font-medium transition-colors",
 								"has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
 								value.unit === unit
 									? "border-primary bg-primary text-primary-foreground"
-									: "border-input bg-background hover:bg-muted"
+									: "border-input bg-card hover:bg-muted"
 							)}
 						>
 							<input

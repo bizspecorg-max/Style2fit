@@ -7,30 +7,32 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscription } from "@/hooks/useSubscription";
+import { PasswordField } from "@/components/PasswordField";
 import { PasswordStrength } from "@/components/PasswordStrength";
 import { ShopFields, clearChangedShopErrors, type ShopErrors, type ShopState } from "@/components/ShopFields";
-import { Badge } from "@/components/ui/badge";
+import { Avatar, StatusPill } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/responsive-dialog";
 import { findCountry, fromE164, toE164 } from "@/lib/countries";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password";
 import { formatDate, useShop, whatsappLink } from "@/lib/shop";
 
 const SUPPORT_PHONE = "+2347035599433";
+const WHATSAPP = "border-[#1f7a4d]/25 bg-[#1f7a4d]/[0.07] text-[#1f7a4d] hover:bg-[#1f7a4d]/[0.12] hover:text-[#1f7a4d]";
 
 function Section({ icon: Icon, title, description, children }: { icon: React.ComponentType<{ className?: string }>; title: string; description?: string; children: React.ReactNode }) {
 	return (
-		<section className="rounded-2xl border bg-card p-5 sm:p-6">
-			<div className="mb-5 flex items-start gap-3">
-				<span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary" aria-hidden>
+		<section className="rounded-3xl border bg-card p-5 shadow-card sm:p-7">
+			<div className="mb-6 flex items-start gap-3">
+				<span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-accent-soft text-accent" aria-hidden>
 					<Icon className="h-4 w-4" />
 				</span>
 				<div>
-					<h2 className="font-display text-lg font-bold">{title}</h2>
-					{description && <p className="text-sm text-muted-foreground">{description}</p>}
+					<h2 className="font-display text-xl">{title}</h2>
+					{description && <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{description}</p>}
 				</div>
 			</div>
 			{children}
@@ -90,7 +92,14 @@ function ShopSection() {
 		toast.success(t("profile.saved"));
 	};
 
-	if (!state) return <Skeleton className="h-80 w-full rounded-xl" />;
+	if (!state)
+		return (
+			<div className="space-y-4">
+				{[0, 1, 2, 3].map((i) => (
+					<Skeleton key={i} className="h-12 w-full rounded-xl" />
+				))}
+			</div>
+		);
 
 	return (
 		<form onSubmit={save} noValidate className="space-y-5">
@@ -106,7 +115,7 @@ function ShopSection() {
 				}}
 				errors={errors}
 			/>
-			<Button type="submit" className="h-11" disabled={saving}>
+			<Button type="submit" className="h-12 w-full rounded-full px-6 sm:w-auto" disabled={saving}>
 				{saving && <Loader2 className="h-4 w-4 animate-spin" />}
 				{t("profile.saveShop")}
 			</Button>
@@ -149,25 +158,25 @@ function PasswordSection() {
 		<form onSubmit={save} noValidate className="space-y-4">
 			<div className="space-y-1.5">
 				<Label htmlFor="current-password">{t("profile.currentPassword")}</Label>
-				<Input id="current-password" type="password" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} className="h-12" />
+				<PasswordField id="current-password" value={current} onChange={setCurrent} autoComplete="current-password" />
 			</div>
 			<div className="grid gap-4 sm:grid-cols-2">
 				<div className="space-y-1.5">
 					<Label htmlFor="new-password">{t("profile.newPassword")}</Label>
-					<Input id="new-password" type="password" autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} aria-describedby="new-password-strength" className="h-12" />
+					<PasswordField id="new-password" value={next} onChange={setNext} autoComplete="new-password" describedBy="new-password-strength" />
 				</div>
 				<div className="space-y-1.5">
 					<Label htmlFor="confirm-password">{t("profile.confirmPassword")}</Label>
-					<Input id="confirm-password" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="h-12" />
+					<PasswordField id="confirm-password" value={confirm} onChange={setConfirm} autoComplete="new-password" />
 				</div>
 			</div>
 			<PasswordStrength id="new-password-strength" password={next} />
 			{error && (
-				<p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+				<p role="alert" className="rounded-2xl bg-destructive/10 p-3 text-sm text-destructive">
 					{error}
 				</p>
 			)}
-			<Button type="submit" variant="outline" className="h-11" disabled={saving}>
+			<Button type="submit" variant="outline" className="h-12 w-full rounded-full px-6 sm:w-auto" disabled={saving}>
 				{saving && <Loader2 className="h-4 w-4 animate-spin" />}
 				{t("profile.updatePassword")}
 			</Button>
@@ -183,7 +192,7 @@ function SubscriptionSection() {
 	const { data: subscription, isLoading } = useSubscription();
 	const [paying, setPaying] = useState(false);
 
-	if (isLoading) return <Skeleton className="h-32 w-full rounded-xl" />;
+	if (isLoading) return <Skeleton className="h-28 w-full rounded-2xl" />;
 
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
@@ -195,28 +204,30 @@ function SubscriptionSection() {
 	const payMessage = t("profile.paidMessage", { email: user?.email ?? "" });
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-5">
 			{searchParams.get("expired") === "true" && !active && !onTrial && (
-				<p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+				<p role="alert" className="rounded-2xl bg-destructive/10 p-3 text-sm text-destructive">
 					{t("profile.expiredBanner")}
 				</p>
 			)}
-			<div className="flex flex-wrap items-center gap-3">
-				<Badge className={active ? "bg-success text-white" : onTrial ? "bg-accent text-accent-foreground" : "bg-destructive text-white"}>
-					{active ? t("profile.planActive") : onTrial ? t("profile.planTrial") : t("profile.planExpired")}
-				</Badge>
-				<p className="text-sm text-muted-foreground">
-					{active
-						? t("profile.validUntil", { date: subscription?.paid_until ? formatDate(subscription.paid_until, shop.locale) : t("profile.recurring") })
-						: onTrial
-							? t("profile.daysLeft", { count: daysLeft })
-							: t("profile.subscribeToContinue")}
-				</p>
+			<div className="flex flex-col gap-4 rounded-2xl bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+				<div className="space-y-1.5">
+					<StatusPill tone={active ? "paid" : onTrial ? "pending" : "overdue"}>
+						{active ? t("profile.planActive") : onTrial ? t("profile.planTrial") : t("profile.planExpired")}
+					</StatusPill>
+					<p className="text-sm text-muted-foreground">
+						{active
+							? t("profile.validUntil", { date: subscription?.paid_until ? formatDate(subscription.paid_until, shop.locale) : t("profile.recurring") })
+							: onTrial
+								? t("profile.daysLeft", { count: daysLeft })
+								: t("profile.subscribeToContinue")}
+					</p>
+				</div>
+				<Button className="h-11 rounded-full px-5" variant={active ? "outline" : "default"} onClick={() => setPaying(true)}>
+					<CreditCard className="h-4 w-4" />
+					{active ? t("profile.renew") : t("profile.upgrade")}
+				</Button>
 			</div>
-			<Button className="h-11" variant={active ? "outline" : "default"} onClick={() => setPaying(true)}>
-				<CreditCard className="h-4 w-4" />
-				{active ? t("profile.renew") : t("profile.upgrade")}
-			</Button>
 
 			<Dialog open={paying} onOpenChange={setPaying}>
 				<DialogContent className="sm:max-w-md">
@@ -225,18 +236,22 @@ function SubscriptionSection() {
 						<DialogDescription>{nigeria ? t("profile.payBodyNg") : t("profile.payBodyIntl")}</DialogDescription>
 					</DialogHeader>
 					{nigeria && (
-						<div className="rounded-xl bg-muted p-4">
+						<div className="rounded-2xl bg-muted p-4">
 							<p className="text-sm text-muted-foreground">{t("profile.opay")}</p>
-							<p className="mt-1 font-mono text-xl tracking-wider">703 559 9433</p>
-							<p className="mt-1 text-sm">{t("profile.accountName")}: <strong>Style2Fit</strong></p>
-							<p className="text-sm">{t("profile.amount")}: <strong>₦5,000 / {t("profile.month")}</strong></p>
+							<p className="mt-1 font-display text-2xl tracking-wider tabular-nums">703 559 9433</p>
+							<p className="mt-1 text-sm">
+								{t("profile.accountName")}: <strong>Style2Fit</strong>
+							</p>
+							<p className="text-sm">
+								{t("profile.amount")}: <strong>₦5,000 / {t("profile.month")}</strong>
+							</p>
 						</div>
 					)}
 					<DialogFooter className="gap-2 sm:gap-0">
-						<Button variant="outline" onClick={() => setPaying(false)}>
+						<Button variant="outline" className="rounded-full" onClick={() => setPaying(false)}>
 							{t("common.cancel")}
 						</Button>
-						<Button className="bg-[#1f7a4d] text-white hover:bg-[#1a6841]" asChild>
+						<Button className="rounded-full bg-[#1f7a4d] text-white hover:bg-[#1a6841]" asChild>
 							<a href={whatsappLink(SUPPORT_PHONE, nigeria ? payMessage : t("profile.intlMessage", { email: user?.email ?? "" }))} target="_blank" rel="noreferrer" onClick={() => setPaying(false)}>
 								<MessageCircle className="h-4 w-4" />
 								{nigeria ? t("profile.iPaid") : t("profile.contactSales")}
@@ -253,6 +268,8 @@ const Profile = () => {
 	const { t } = useTranslation();
 	const { user, signOut } = useAuth();
 	const navigate = useNavigate();
+	const meta = (user?.user_metadata ?? {}) as Record<string, string | undefined>;
+	const business = meta.business_name || "Style2Fit";
 
 	useEffect(() => {
 		document.title = `${t("nav.profile")} · Style2Fit`;
@@ -260,9 +277,13 @@ const Profile = () => {
 
 	return (
 		<div className="mx-auto max-w-2xl space-y-6">
-			<header>
-				<h1 className="font-display text-3xl font-bold">{t("nav.profile")}</h1>
-				<p className="text-sm text-muted-foreground">{user?.email}</p>
+			<header className="flex items-center gap-4">
+				<Avatar name={business} size="lg" />
+				<div className="min-w-0">
+					<p className="eyebrow">{t("nav.profile")}</p>
+					<h1 className="mt-1 truncate font-display text-3xl leading-tight">{business}</h1>
+					<p className="truncate text-sm text-muted-foreground">{user?.email}</p>
+				</div>
 			</header>
 
 			<Section icon={Store} title={t("profile.shopTitle")} description={t("profile.shopBody")}>
@@ -276,7 +297,7 @@ const Profile = () => {
 			</Section>
 			<Section icon={UserRound} title={t("profile.helpTitle")} description={t("profile.helpBody")}>
 				<div className="flex flex-col gap-2 sm:flex-row">
-					<Button variant="outline" className="h-11" asChild>
+					<Button variant="outline" className={`h-12 rounded-full px-5 ${WHATSAPP}`} asChild>
 						<a href={whatsappLink(SUPPORT_PHONE, t("profile.supportMessage", { email: user?.email ?? "" }))} target="_blank" rel="noreferrer">
 							<MessageCircle className="h-4 w-4" />
 							{t("profile.whatsappSupport")}
@@ -284,7 +305,7 @@ const Profile = () => {
 					</Button>
 					<Button
 						variant="ghost"
-						className="h-11 text-destructive hover:text-destructive"
+						className="h-12 rounded-full px-5 text-destructive hover:bg-destructive/10 hover:text-destructive"
 						onClick={async () => {
 							await signOut();
 							navigate("/auth", { replace: true });

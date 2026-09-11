@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
 import { ShopFields, clearChangedShopErrors, type ShopErrors, type ShopState } from "@/components/ShopFields";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { findCountry, fromE164, guessCountry, toE164 } from "@/lib/countries";
 
 /**
@@ -65,15 +66,18 @@ const Onboarding = () => {
 	};
 
 	return (
-		<div className="min-h-dvh bg-muted/40 px-5 py-8 sm:py-12">
-			<div className="mx-auto w-full max-w-md space-y-6">
+		<div className="min-h-dvh bg-background px-5 py-8 sm:py-14">
+			<div className="mx-auto w-full max-w-md space-y-8">
 				<Logo />
-				<div className="rounded-2xl border bg-card p-6 shadow-soft sm:p-8">
-					<h1 className="font-display text-2xl font-bold">{t("onboarding.title")}</h1>
-					<p className="mt-1 text-sm text-muted-foreground">{t("onboarding.subtitle")}</p>
+				<div className="rounded-3xl border bg-card p-6 shadow-card sm:p-8">
+					<p className="eyebrow text-accent">{t("onboarding.eyebrow")}</p>
+					<h1 className="mt-2 font-display text-3xl leading-tight">{t("onboarding.title")}</h1>
+					<p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("onboarding.subtitle")}</p>
 					{!shop ? (
-						<div className="flex justify-center py-12" role="status" aria-label={t("common.loading")}>
-							<Loader2 className="h-6 w-6 animate-spin text-primary" />
+						<div className="mt-6 space-y-4" role="status" aria-label={t("common.loading")}>
+							{[0, 1, 2, 3].map((i) => (
+								<Skeleton key={i} className="h-12 w-full rounded-xl" />
+							))}
 						</div>
 					) : (
 						<form onSubmit={save} noValidate className="mt-6 space-y-6">
@@ -85,7 +89,7 @@ const Onboarding = () => {
 								}}
 								errors={errors}
 							/>
-							<Button type="submit" className="h-12 w-full text-base" disabled={saving}>
+							<Button type="submit" className="h-12 w-full rounded-full text-base shadow-soft" disabled={saving}>
 								{saving && <Loader2 className="h-4 w-4 animate-spin" />}
 								{saving ? t("onboarding.saving") : t("onboarding.save")}
 							</Button>

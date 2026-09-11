@@ -17,11 +17,14 @@ export function StyleDialog({
 	open,
 	onOpenChange,
 	style,
+	initial,
 	onSaved,
 }: {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	style: StyleRow | null;
+	/** Starting values for a new style, e.g. a photo saved from Discover. */
+	initial?: { name: string; category: Category; image_url: string } | null;
 	onSaved: () => void;
 }) {
 	const { t } = useTranslation();
@@ -36,13 +39,13 @@ export function StyleDialog({
 
 	useEffect(() => {
 		if (!open) return;
-		const cat = (style?.category as Category) ?? "Shirt";
-		setName(style?.name ?? "");
+		const cat = (style?.category as Category) ?? initial?.category ?? "Shirt";
+		setName(style?.name ?? initial?.name ?? "");
 		setCategory(CATEGORIES.includes(cat) ? cat : "Other");
-		setImageUrl(style?.image_url ?? "");
+		setImageUrl(style?.image_url ?? initial?.image_url ?? "");
 		setFields(style?.measurement_template?.length ? style.measurement_template : TEMPLATES[cat] ?? TEMPLATES.Shirt);
 		setError(undefined);
-	}, [open, style]);
+	}, [open, style, initial]);
 
 	const changeCategory = (next: Category) => {
 		setCategory(next);

@@ -3,6 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageFallback } from "@/components/PageFallback";
 import { pages } from "@/lib/pages";
+import { isReturning } from "@/lib/visit";
 
 const Landing = lazy(pages.Landing);
 
@@ -23,6 +24,8 @@ export const ProtectedRoute = ({
 	if (loading) return <PageFallback fullScreen />;
 	if (!user) {
 		if (location.pathname === "/") {
+			// People who have signed in on this device before go straight to sign-in.
+			if (isReturning()) return <Navigate to="/auth" replace />;
 			return (
 				<Suspense fallback={<PageFallback fullScreen />}>
 					<Landing />
