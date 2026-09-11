@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/responsive-dialog";
 import { cloudinaryConfigured, uploadToCloudinary } from "@/lib/cloudinary";
 import { CATEGORIES, TEMPLATES, newField, type Category, type MeasurementField } from "@/lib/measurementTemplates";
 import type { StyleRow } from "@/lib/styles";

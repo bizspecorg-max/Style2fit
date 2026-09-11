@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCustomers } from "@/pages/Customers";
-import { formatDate, initials, useShop } from "@/lib/shop";
+import { formatDate, formatPhone, initials, useShop } from "@/lib/shop";
 import { toast } from "sonner";
 
 type Recent = { id: string; title: string; created_at: string; customer_id: string; customers: { name: string } | null };
@@ -104,7 +104,7 @@ const QuickMeasure = () => {
 									</span>
 									<span className="min-w-0 flex-1">
 										<span className="block truncate font-medium">{c.name}</span>
-										<span className="block truncate text-sm text-muted-foreground">{c.phone ?? t("customers.noContact")}</span>
+										<span className="block truncate text-sm text-muted-foreground">{c.phone ? formatPhone(c.phone) : t("customers.noContact")}</span>
 									</span>
 									<span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
 										<Ruler className="h-4 w-4" aria-hidden />
@@ -135,7 +135,7 @@ const QuickMeasure = () => {
 									<span className="min-w-0 flex-1">
 										<span className="block truncate font-medium">{m.customers?.name ?? "—"}</span>
 										<span className="block truncate text-sm text-muted-foreground">
-											{m.title.includes(formatDate(m.created_at, shop.locale))
+											{/\d{4}/.test(m.title)
 												? m.title
 												: `${m.title} · ${formatDate(m.created_at, shop.locale)}`}
 										</span>

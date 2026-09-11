@@ -49,17 +49,15 @@ export type Order = {
 export const ORDER_SELECT =
 	"id, code, status, payment_status, delivery_date, price, notes, measurement_values, customer_id, style_id, image_url, created_at, customers(name, phone), styles(name, category, image_url, measurement_template)";
 
+export async function fetchOrders() {
+	const { data, error } = await supabase.from("orders").select(ORDER_SELECT).order("created_at", { ascending: false });
+	if (error) throw error;
+	return (data ?? []) as unknown as Order[];
+}
+
 export function useOrders() {
 	const { user } = useAuth();
-	return useQuery({
-		queryKey: ["orders", user?.id],
-		enabled: !!user,
-		queryFn: async () => {
-			const { data, error } = await supabase.from("orders").select(ORDER_SELECT).order("created_at", { ascending: false });
-			if (error) throw error;
-			return (data ?? []) as unknown as Order[];
-		},
-	});
+	return useQuery({ queryKey: ["orders", user?.id], enabled: !!user, queryFn: fetchOrders });
 }
 
 export function useOrder(id: string | undefined) {

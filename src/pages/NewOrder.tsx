@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCustomers } from "@/pages/Customers";
 import { PAYMENT_STATUSES, fieldsForStyle, type PaymentStatus } from "@/lib/orders";
 import { useStyles } from "@/lib/styles";
-import { formatDate, formatMoney, initials, useShop } from "@/lib/shop";
+import { formatDate, formatMoney, formatPhone, initials, useShop } from "@/lib/shop";
 import { convertInput, normalizeUnit, parseMeasure as parseNumber } from "@/lib/units";
 import { cn } from "@/lib/utils";
 
@@ -217,7 +217,7 @@ const NewOrder = () => {
 										</span>
 										<span className="min-w-0 flex-1">
 											<span className="block truncate font-medium">{c.name}</span>
-											<span className="block truncate text-sm text-muted-foreground">{c.phone ?? t("customers.noContact")}</span>
+											<span className="block truncate text-sm text-muted-foreground">{c.phone ? formatPhone(c.phone) : t("customers.noContact")}</span>
 										</span>
 										{customerId === c.id && <Check className="h-5 w-5 text-primary" aria-hidden />}
 									</label>

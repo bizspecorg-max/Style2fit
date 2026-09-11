@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/responsive-dialog";
 import { CATEGORIES, TEMPLATES, newField } from "@/lib/measurementTemplates";
 import { formatDate, useShop } from "@/lib/shop";
 import { convertInput, normalizeUnit, parseMeasure, type MeasureUnit } from "@/lib/units";
