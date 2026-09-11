@@ -36,7 +36,7 @@ export function PhoneInput({ id, country, national, onCountryChange, onNationalC
 					id={`${id}-country`}
 					value={country}
 					onChange={(e) => onCountryChange(e.target.value)}
-					className="h-12 w-[6.75rem] appearance-none rounded-md border border-input bg-background pl-3 pr-7 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					className="h-12 w-[6.75rem] appearance-none rounded-xl border border-input bg-card pl-3 pr-7 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 				>
 					{options.map((c) => (
 						<option key={c.code} value={c.code}>
@@ -47,7 +47,7 @@ export function PhoneInput({ id, country, national, onCountryChange, onNationalC
 				{/* The closed select shows only the flag and code; the list shows full names. */}
 				<span
 					aria-hidden
-					className="pointer-events-none absolute inset-y-px left-px right-6 flex items-center gap-1 overflow-hidden whitespace-nowrap rounded-l-md bg-background pl-3 text-base"
+					className="pointer-events-none absolute inset-y-px left-px right-6 flex items-center gap-1 overflow-hidden whitespace-nowrap rounded-l-md bg-card pl-3 text-base"
 				>
 					{current && `${flag(current.code)} +${current.dial}`}
 				</span>

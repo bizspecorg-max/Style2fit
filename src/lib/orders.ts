@@ -80,6 +80,17 @@ export function fieldsForStyle(style: Pick<OrderStyle, "category" | "measurement
 	return TEMPLATES[style.category as Category] ?? [];
 }
 
+/** "round_sleeve" → "Round sleeve" — for measurements whose label wasn't saved with the style. */
+export const humanizeKey = (key: string) => key.replace(/_/g, " ").replace(/^\p{L}/u, (c) => c.toUpperCase());
+
+/** Prices as people type them: "25,000", "₦25000", "25 000". */
+export function parseMoney(raw: string): number | null {
+	const cleaned = raw.replace(/[\s,₦$£€]/g, "");
+	if (!cleaned) return null;
+	const n = Number(cleaned);
+	return Number.isFinite(n) ? n : null;
+}
+
 const todayIso = () => new Date().toISOString().slice(0, 10);
 
 export const isOverdue = (o: Pick<Order, "delivery_date" | "status">) =>

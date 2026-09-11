@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Check, MessageCircle, MoreHorizontal, Phone, Printer, Shirt, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, MessageCircle, MoreHorizontal, Pencil, Phone, Printer, Shirt, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { EditOrderDialog } from "@/components/EditOrderDialog";
 import { useDueLabel } from "@/components/OrderRow";
 import { Avatar, MobileActionBar, StatusPill } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ORDER_STATUSES, PAYMENT_STATUSES, fieldsForStyle, isOverdue, nextStatus, useOrder, type Order } from "@/lib/orders";
+import { ORDER_STATUSES, PAYMENT_STATUSES, fieldsForStyle, humanizeKey, isOverdue, nextStatus, useOrder, type Order } from "@/lib/orders";
 import { formatDate, formatMoney, formatPhone, shortCode, useShop, whatsappLink } from "@/lib/shop";
 import { formatMeasure } from "@/lib/units";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,7 @@ const OrderDetail = () => {
 	const { data: order, isLoading, isError, refetch } = useOrder(id);
 	const [busy, setBusy] = useState<string | null>(null);
 	const [confirmDelete, setConfirmDelete] = useState(false);
+	const [editing, setEditing] = useState(false);
 
 	useEffect(() => {
 		if (order) document.title = `${t("orders.detail.orderNo", { code: shortCode(order.code) })} · Style2Fit`;
@@ -110,7 +112,7 @@ const OrderDetail = () => {
 	// Order measurements were saved without a unit; they were taken in the shop's unit.
 	const measurements = Object.entries(order.measurement_values ?? {})
 		.filter(([, v]) => v)
-		.map(([key, value]) => ({ label: labels.get(key) ?? key.replace(/_/g, " "), value: formatMeasure(value, shop.unit, shop.unit, shop.locale) }));
+		.map(([key, value]) => ({ label: labels.get(key) ?? humanizeKey(key), value: formatMeasure(value, shop.unit, shop.unit, shop.locale) }));
 	const customerName = order.customers?.name ?? "";
 	const phone = order.customers?.phone;
 	const styleName = order.styles?.name ?? t("orders.detail.yourOutfit");
@@ -155,6 +157,10 @@ const OrderDetail = () => {
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end" className="w-44">
+						<DropdownMenuItem onSelect={() => setEditing(true)}>
+							<Pencil className="mr-2 h-4 w-4" />
+							{t("orders.edit.action")}
+						</DropdownMenuItem>
 						<DropdownMenuItem onSelect={() => window.print()}>
 							<Printer className="mr-2 h-4 w-4" />
 							{t("orders.detail.print")}
@@ -189,17 +195,23 @@ const OrderDetail = () => {
 					<ol className="mt-7 flex items-start print:hidden" aria-label={t("orders.detail.progress")}>
 						{ORDER_STATUSES.map((s, i) => (
 							<li key={s} className="relative flex flex-1 flex-col items-center text-center" aria-current={i === current ? "step" : undefined}>
-								{i > 0 && <span className={cn("absolute right-1/2 top-3.5 h-0.5 w-full -translate-y-1/2", i <= current ? "bg-primary" : "bg-border")} aria-hidden />}
-								<span
+								{/* The connector sits under the step buttons and ignores taps, so each step stays fully tappable. */}
+								{i > 0 && <span className={cn("pointer-events-none absolute right-1/2 top-3.5 h-0.5 w-full -translate-y-1/2", i <= current ? "bg-primary" : "bg-border")} aria-hidden />}
+								{/* Tap any step to set it — also undoes a status tapped by mistake. */}
+								<button
+									type="button"
+									disabled={i === current || !!busy}
+									onClick={() => update({ status: s }, "status")}
+									aria-label={t("orders.edit.setStatus", { status: t(`orderStatus.${s}`) })}
 									className={cn(
-										"relative flex h-7 w-7 items-center justify-center rounded-full border-2 bg-card text-xs font-semibold",
+										"relative flex h-7 w-7 items-center justify-center rounded-full border-2 bg-card text-xs font-semibold transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring enabled:hover:scale-110 disabled:cursor-default",
 										i < current && "border-primary bg-primary text-primary-foreground",
 										i === current && "border-primary text-primary ring-4 ring-primary/10",
 										i > current && "border-border text-muted-foreground"
 									)}
 								>
 									{i < current ? <Check className="h-3.5 w-3.5" aria-hidden /> : i + 1}
-								</span>
+								</button>
 								<span className={cn("mt-2 text-[11px] font-medium leading-tight sm:text-xs", i === current ? "text-foreground" : "text-muted-foreground")}>{t(`orderStatus.${s}`)}</span>
 							</li>
 						))}
@@ -224,7 +236,13 @@ const OrderDetail = () => {
 			<div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
 				<div className="space-y-6">
 					<section className="rounded-3xl border bg-card p-5 shadow-card sm:p-6">
-						<h2 className="font-display text-xl">{t("orders.detail.measurements")}</h2>
+						<div className="flex items-center justify-between gap-2">
+							<h2 className="font-display text-xl">{t("orders.detail.measurements")}</h2>
+							<Button variant="ghost" size="sm" className="-mr-2 rounded-full print:hidden" onClick={() => setEditing(true)}>
+								<Pencil className="h-4 w-4" />
+								{t("common.edit")}
+							</Button>
+						</div>
 						{measurements.length === 0 ? (
 							<p className="mt-3 text-sm text-muted-foreground">{t("measure.noValues")}</p>
 						) : (
@@ -319,6 +337,8 @@ const OrderDetail = () => {
 					</Button>
 				)}
 			</MobileActionBar>
+
+			<EditOrderDialog open={editing} onOpenChange={setEditing} order={order} onSaved={refresh} />
 
 			<AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
 				<AlertDialogContent className="rounded-3xl">

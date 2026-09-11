@@ -6,6 +6,7 @@ import { fetchCustomers } from "@/lib/customers";
 import { fetchOrders } from "@/lib/orders";
 import { preloadPages } from "@/lib/pages";
 import { fetchStyles } from "@/lib/styles";
+import { markReturning } from "@/lib/visit";
 import { ClipboardList, LayoutDashboard, LogOut, Plus, Ruler, Shirt, User, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Logo } from "@/components/Logo";
@@ -123,6 +124,7 @@ function useWarmUp() {
 	const queryClient = useQueryClient();
 	useEffect(() => {
 		if (!user) return;
+		markReturning();
 		preloadPages();
 		// A short delay lets the current screen's own requests go first.
 		const timer = setTimeout(() => {

@@ -25,7 +25,7 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { TEMPLATES, type Category } from "@/lib/measurementTemplates";
-import { ORDER_SELECT, type Order } from "@/lib/orders";
+import { ORDER_SELECT, humanizeKey, type Order } from "@/lib/orders";
 import { formatDate, formatPhone, shortCode, useShop, whatsappLink } from "@/lib/shop";
 import { formatMeasure, normalizeUnit, type MeasureUnit } from "@/lib/units";
 import { cn } from "@/lib/utils";
@@ -172,7 +172,7 @@ const CustomerDetail = () => {
 					unit: shop.unit,
 					items: Object.entries(o.measurement_values ?? {})
 						.filter(([, v]) => v)
-						.map(([key, value]) => ({ label: labels.get(key) ?? key.replace(/_/g, " "), value })),
+						.map(([key, value]) => ({ label: labels.get(key) ?? humanizeKey(key), value })),
 				};
 			});
 		return [...fromMeasurements, ...fromOrders].sort((a, b) => b.date.localeCompare(a.date));
