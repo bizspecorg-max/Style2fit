@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        display: ['Fraunces', 'Georgia', 'serif'],
+        display: ['"Bodoni Moda"', 'Didot', 'Georgia', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -44,6 +44,7 @@ export default {
         },
         accent: {
           DEFAULT: "hsl(var(--accent))",
+          bright: "hsl(var(--accent-bright))",
           foreground: "hsl(var(--accent-foreground))",
           soft: "hsl(var(--accent-soft))",
         },

@@ -10,6 +10,16 @@ import { whatsappLink } from "@/lib/shop";
 const SUPPORT_PHONE = "+2347035599433";
 const photo = (id: string) => `https://images.unsplash.com/${id}?w=240&q=70&auto=format&fit=crop`;
 
+/** A chalk mark before a section label — the same rule that opens every section. */
+function Eyebrow({ children, tone = "accent" }: { children: React.ReactNode; tone?: "accent" | "light" }) {
+	return (
+		<p className={`eyebrow flex items-center gap-3 ${tone === "light" ? "text-primary-foreground/60" : "text-accent"}`}>
+			<span aria-hidden className={`h-px w-7 ${tone === "light" ? "bg-primary-foreground/30" : "bg-accent/50"}`} />
+			{children}
+		</p>
+	);
+}
+
 /** Illustrative preview of the app (sample names, not real data). */
 function PhonePreview() {
 	const { t } = useTranslation();
@@ -19,23 +29,30 @@ function PhonePreview() {
 		{ name: "Ibrahim M.", style: "Classic senator", img: "photo-1622519407650-3df9883f76a5", due: t("landing.preview.delivered"), tone: "delivered", status: t("orderStatus.delivered"), price: "₦65,000" },
 	];
 	return (
-		<div aria-hidden className="relative mx-auto w-full max-w-[20rem]">
-			<div className="absolute -inset-10 rounded-full bg-accent/20 blur-3xl" />
-			<div className="relative rounded-[2.5rem] border-[10px] border-[hsl(160_40%_8%)] bg-background p-4 shadow-elevated">
-				<div className="mx-auto mb-4 h-1.5 w-16 rounded-full bg-muted" />
+		<div aria-hidden className="relative mx-auto w-full max-w-[19rem]">
+			<div className="pointer-events-none absolute inset-x-0 -inset-y-12 rounded-full bg-accent/10 blur-3xl" />
+			{/* A slim bezel. The old 10px one made the mock read as a toy phone. */}
+			<div className="relative rounded-[1.75rem] border-[6px] border-[hsl(158_45%_7%)] bg-background p-3.5 shadow-elevated">
+				<div className="mx-auto mb-3.5 h-1 w-14 rounded-full bg-muted" />
 				<p className="eyebrow">{t("landing.preview.today")}</p>
-				<div className="mt-2 rounded-2xl bg-gradient-hero p-4 text-primary-foreground">
+				<div className="mt-2 rounded-md bg-gradient-hero p-4 text-primary-foreground">
 					<p className="font-display text-xl leading-tight">{t("landing.preview.pickups")}</p>
 					<p className="mt-1 text-xs text-primary-foreground/70">{t("landing.preview.overdue")}</p>
 				</div>
 				<div className="mt-3 space-y-2">
 					{rows.map((r) => (
-						<div key={r.name} className="flex items-center gap-3 rounded-xl border bg-card p-2.5 shadow-card">
-							<img src={photo(r.img)} alt="" className="h-12 w-10 rounded-lg object-cover" />
+						<div key={r.name} className="flex items-center gap-3 rounded-md border bg-card p-2.5">
+							<img
+								src={photo(r.img)}
+								alt=""
+								loading="lazy"
+								onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
+								className="h-12 w-10 rounded-sm bg-muted object-cover"
+							/>
 							<div className="min-w-0 flex-1">
 								<div className="flex items-baseline justify-between gap-2">
 									<span className="truncate text-sm font-semibold">{r.name}</span>
-									<span className="font-display text-sm">{r.price}</span>
+									<span className="numeral text-sm">{r.price}</span>
 								</div>
 								<p className="truncate text-[11px] text-muted-foreground">{r.style}</p>
 								<div className="mt-1 flex items-center justify-between">
@@ -49,9 +66,9 @@ function PhonePreview() {
 					))}
 				</div>
 			</div>
-			<div className="absolute -left-16 top-28 hidden rounded-2xl border bg-card p-3 shadow-elevated sm:block">
+			<div className="absolute -left-[8rem] top-36 hidden rounded-md border bg-card p-3 shadow-elevated lg:block">
 				<p className="text-[11px] text-muted-foreground">{t("landing.preview.chest")}</p>
-				<p className="font-display text-lg">41 in · 104.1 cm</p>
+				<p className="numeral mt-0.5 text-lg">41 in · 104.1 cm</p>
 			</div>
 		</div>
 	);
@@ -78,20 +95,20 @@ const Landing = () => {
 
 	return (
 		<div className="min-h-dvh bg-background">
-			<header className="sticky top-0 z-40 border-b border-transparent bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+			<header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
 				<div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
 					<Logo />
-					<nav aria-label={t("landing.navLabel")} className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-						<a href="#features" className="hover:text-foreground">{t("landing.nav.features")}</a>
-						<a href="#how" className="hover:text-foreground">{t("landing.nav.how")}</a>
-						<a href="#pricing" className="hover:text-foreground">{t("landing.nav.pricing")}</a>
-						<a href="#faq" className="hover:text-foreground">{t("landing.nav.faq")}</a>
+					<nav aria-label={t("landing.navLabel")} className="hidden items-center gap-9 text-sm text-muted-foreground md:flex">
+						<a href="#features" className="transition-colors hover:text-foreground">{t("landing.nav.features")}</a>
+						<a href="#how" className="transition-colors hover:text-foreground">{t("landing.nav.how")}</a>
+						<a href="#pricing" className="transition-colors hover:text-foreground">{t("landing.nav.pricing")}</a>
+						<a href="#faq" className="transition-colors hover:text-foreground">{t("landing.nav.faq")}</a>
 					</nav>
-					<div className="flex items-center gap-2">
-						<Button variant="ghost" className="h-10 rounded-full px-4" asChild>
+					<div className="flex items-center gap-1.5">
+						<Button variant="ghost" className="h-10 px-4" asChild>
 							<Link to="/auth">{t("auth.signIn")}</Link>
 						</Button>
-						<Button className="h-10 rounded-full px-5" asChild>
+						<Button className="h-10 px-5" asChild>
 							<Link to="/auth?mode=signup">{t("landing.cta")}</Link>
 						</Button>
 					</div>
@@ -100,39 +117,38 @@ const Landing = () => {
 
 			<main>
 				{/* Hero */}
-				<section className="mx-auto grid max-w-6xl items-center gap-14 px-5 pb-20 pt-12 md:grid-cols-[1.1fr_1fr] md:pt-20">
+				<section className="mx-auto grid max-w-6xl items-center gap-14 px-5 pb-24 pt-14 md:grid-cols-[1.08fr_1fr] md:pt-20">
 					<div>
-						<p className="eyebrow text-accent">{t("landing.eyebrow")}</p>
-						<h1 className="mt-4 font-display text-5xl leading-[1.02] text-balance sm:text-6xl">{t("landing.title")}</h1>
-						<p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">{t("landing.subtitle")}</p>
-						<div className="mt-8 flex flex-col gap-3 sm:flex-row">
-							<Button className="h-12 rounded-full px-7 text-base shadow-soft" asChild>
+						<Eyebrow>{t("landing.eyebrow")}</Eyebrow>
+						<h1 className="mt-5 font-display text-[2.6rem] font-semibold leading-[1.06] text-balance sm:text-[3.25rem]">{t("landing.title")}</h1>
+						<p className="mt-6 max-w-[34rem] text-lg leading-relaxed text-muted-foreground">{t("landing.subtitle")}</p>
+						<div className="mt-9 flex flex-col gap-3 sm:flex-row">
+							<Button className="h-12 px-7 text-base" asChild>
 								<Link to="/auth?mode=signup">
 									{t("landing.cta")}
 									<ArrowRight className="h-4 w-4" />
 								</Link>
 							</Button>
-							<Button variant="outline" className="h-12 rounded-full bg-card px-7 text-base" asChild>
+							<Button variant="outline" className="h-12 bg-card px-7 text-base" asChild>
 								<Link to="/auth">{t("landing.haveAccount")}</Link>
 							</Button>
 						</div>
-						<p className="mt-5 text-sm text-muted-foreground">{t("landing.trust")}</p>
+						<p className="mt-7 border-t pt-4 text-sm text-muted-foreground">{t("landing.trust")}</p>
 					</div>
 					<PhonePreview />
 				</section>
 
 				{/* Features */}
-				<section id="features" className="border-y bg-card/60 py-20">
+				<section id="features" className="border-y bg-card/50 py-24">
 					<div className="mx-auto max-w-6xl px-5">
-						<p className="eyebrow text-accent">{t("landing.nav.features")}</p>
-						<h2 className="mt-3 max-w-2xl font-display text-4xl leading-tight">{t("landing.featuresTitle")}</h2>
-						<div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+						<Eyebrow>{t("landing.nav.features")}</Eyebrow>
+						<h2 className="mt-4 max-w-2xl font-display text-4xl font-semibold leading-[1.12]">{t("landing.featuresTitle")}</h2>
+						{/* Hairlines, not cards: six boxes with six shadows flattened the page. */}
+						<div className="mt-14 grid gap-x-10 gap-y-11 sm:grid-cols-2 lg:grid-cols-3">
 							{features.map((f) => (
-								<article key={f.title} className="rounded-3xl border bg-card p-6 shadow-card">
-									<span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent-soft text-accent">
-										<f.icon className="h-5 w-5" aria-hidden />
-									</span>
-									<h3 className="mt-5 font-display text-xl">{f.title}</h3>
+								<article key={f.title} className="border-t pt-6">
+									<f.icon className="h-5 w-5 text-accent" aria-hidden strokeWidth={1.5} />
+									<h3 className="mt-4 text-[1.0625rem] font-semibold tracking-[-0.01em]">{f.title}</h3>
 									<p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
 								</article>
 							))}
@@ -140,14 +156,14 @@ const Landing = () => {
 					</div>
 				</section>
 
-				{/* How it works */}
-				<section id="how" className="mx-auto max-w-6xl px-5 py-20">
-					<p className="eyebrow text-accent">{t("landing.nav.how")}</p>
-					<h2 className="mt-3 font-display text-4xl">{t("landing.howTitle")}</h2>
-					<ol className="mt-12 grid gap-6 md:grid-cols-3">
+				{/* How it works — a real sequence, so it is numbered. */}
+				<section id="how" className="mx-auto max-w-6xl px-5 py-24">
+					<Eyebrow>{t("landing.nav.how")}</Eyebrow>
+					<h2 className="mt-4 font-display text-4xl font-semibold">{t("landing.howTitle")}</h2>
+					<ol className="mt-14 grid gap-x-10 gap-y-10 md:grid-cols-3">
 						{steps.map((s, i) => (
-							<li key={s} className="relative rounded-3xl border bg-card p-6 shadow-card">
-								<span className="font-display text-5xl text-accent/40">0{i + 1}</span>
+							<li key={s} className="border-t pt-6">
+								<span className="numeral text-sm text-accent">{String(i + 1).padStart(2, "0")}</span>
 								<p className="mt-3 text-base leading-relaxed">{s}</p>
 							</li>
 						))}
@@ -155,28 +171,28 @@ const Landing = () => {
 				</section>
 
 				{/* Pricing */}
-				<section id="pricing" className="bg-gradient-hero py-20 text-primary-foreground">
-					<div className="mx-auto grid max-w-6xl items-center gap-10 px-5 md:grid-cols-2">
+				<section id="pricing" className="bg-gradient-hero py-24 text-primary-foreground">
+					<div className="mx-auto grid max-w-6xl items-center gap-12 px-5 md:grid-cols-2">
 						<div>
-							<p className="eyebrow text-primary-foreground/60">{t("landing.nav.pricing")}</p>
-							<h2 className="mt-3 font-display text-4xl leading-tight">{t("landing.pricing.title")}</h2>
-							<p className="mt-4 max-w-md text-primary-foreground/75">{t("landing.pricing.body")}</p>
+							<Eyebrow tone="light">{t("landing.nav.pricing")}</Eyebrow>
+							<h2 className="mt-4 font-display text-4xl font-semibold leading-[1.12]">{t("landing.pricing.title")}</h2>
+							<p className="mt-5 max-w-md leading-relaxed text-primary-foreground/75">{t("landing.pricing.body")}</p>
 						</div>
-						<div className="hairline-gold rounded-3xl bg-white/5 p-7 ring-1 ring-white/10 backdrop-blur">
-							<p className="eyebrow text-primary-foreground/60">{t("landing.pricing.plan")}</p>
-							<p className="mt-3 font-display text-5xl">
-								₦5,000<span className="text-lg text-primary-foreground/60"> / {t("profile.month")}</span>
+						<div className="hairline-gold rounded-md bg-white/5 p-8 ring-1 ring-white/10 backdrop-blur">
+							<Eyebrow tone="light">{t("landing.pricing.plan")}</Eyebrow>
+							<p className="numeral mt-4 text-5xl">
+								₦5,000<span className="font-sans text-base font-normal text-primary-foreground/60"> / {t("profile.month")}</span>
 							</p>
-							<p className="mt-1 text-sm text-primary-foreground/70">{t("landing.pricing.trial")}</p>
-							<ul className="mt-6 space-y-3 text-sm">
+							<p className="mt-2 text-sm text-primary-foreground/70">{t("landing.pricing.trial")}</p>
+							<ul className="mt-7 space-y-3 border-t border-white/10 pt-6 text-sm">
 								{included.map((i) => (
 									<li key={i} className="flex items-start gap-3">
-										<Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
+										<Check className="mt-0.5 h-4 w-4 shrink-0 text-accent-bright" aria-hidden strokeWidth={2} />
 										{i}
 									</li>
 								))}
 							</ul>
-							<Button className="mt-8 h-12 w-full rounded-full bg-accent text-base text-accent-foreground shadow-gold hover:bg-accent/90" asChild>
+							<Button className="mt-8 h-12 w-full bg-accent-bright text-base font-semibold text-accent-foreground hover:bg-accent-bright/90" asChild>
 								<Link to="/auth?mode=signup">{t("landing.cta")}</Link>
 							</Button>
 						</div>
@@ -184,29 +200,29 @@ const Landing = () => {
 				</section>
 
 				{/* FAQ */}
-				<section id="faq" className="mx-auto max-w-3xl px-5 py-20">
-					<p className="eyebrow text-accent">{t("landing.nav.faq")}</p>
-					<h2 className="mt-3 font-display text-4xl">{t("landing.faqTitle")}</h2>
-					<div className="mt-10 divide-y rounded-3xl border bg-card shadow-card">
+				<section id="faq" className="mx-auto max-w-3xl px-5 py-24">
+					<Eyebrow>{t("landing.nav.faq")}</Eyebrow>
+					<h2 className="mt-4 font-display text-4xl font-semibold">{t("landing.faqTitle")}</h2>
+					<div className="mt-12 divide-y border-y">
 						{faqs.map((f) => (
-							<details key={f.q} className="group p-5 sm:p-6">
+							<details key={f.q} className="group py-5">
 								<summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium [&::-webkit-details-marker]:hidden">
 									{f.q}
-									<span className="text-xl text-accent transition-transform group-open:rotate-45" aria-hidden>
+									<span className="text-xl font-light text-accent transition-transform group-open:rotate-45" aria-hidden>
 										+
 									</span>
 								</summary>
-								<p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
+								<p className="mt-3 max-w-[60ch] text-sm leading-relaxed text-muted-foreground">{f.a}</p>
 							</details>
 						))}
 					</div>
 				</section>
 
-				<section className="mx-auto max-w-6xl px-5 pb-24">
-					<div className="rounded-3xl border bg-card p-8 text-center shadow-card sm:p-12">
-						<h2 className="font-display text-3xl sm:text-4xl">{t("landing.finalTitle")}</h2>
-						<p className="mt-3 text-muted-foreground">{t("landing.trust")}</p>
-						<Button className="mt-8 h-12 rounded-full px-8 text-base" asChild>
+				<section className="mx-auto max-w-6xl px-5 pb-28">
+					<div className="border-t pt-16 text-center">
+						<h2 className="font-display text-3xl font-semibold sm:text-4xl">{t("landing.finalTitle")}</h2>
+						<p className="mt-4 text-muted-foreground">{t("landing.trust")}</p>
+						<Button className="mt-9 h-12 px-8 text-base" asChild>
 							<Link to="/auth?mode=signup">
 								{t("landing.cta")}
 								<ArrowRight className="h-4 w-4" />
@@ -217,9 +233,9 @@ const Landing = () => {
 			</main>
 
 			<footer className="border-t">
-				<div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-8 text-sm text-muted-foreground sm:flex-row">
+				<div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-9 text-sm text-muted-foreground sm:flex-row">
 					<Logo size="sm" />
-					<a href={whatsappLink(SUPPORT_PHONE, "Hello Style2Fit!")} target="_blank" rel="noreferrer" className="hover:text-foreground">
+					<a href={whatsappLink(SUPPORT_PHONE, "Hello Style2Fit!")} target="_blank" rel="noreferrer" className="transition-colors hover:text-foreground">
 						{t("landing.support")}
 					</a>
 					<p>© {new Date().getFullYear()} Style2Fit</p>
