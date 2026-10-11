@@ -58,8 +58,8 @@ export function EmptyState({
 	action?: React.ReactNode;
 }) {
 	return (
-		<div className="flex flex-col items-center rounded-3xl border border-dashed bg-card/60 px-6 py-14 text-center">
-			<span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-soft text-accent shadow-card">
+		<div className="flex flex-col items-center rounded-md border border-dashed bg-card/60 px-6 py-14 text-center">
+			<span className="flex h-14 w-14 items-center justify-center rounded-md bg-accent-soft text-accent shadow-card">
 				<Icon className="h-6 w-6" aria-hidden />
 			</span>
 			<h2 className="mt-5 font-display text-2xl">{title}</h2>

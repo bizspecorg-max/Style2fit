@@ -96,7 +96,7 @@ const Dashboard = () => {
 			</header>
 
 			{isError ? (
-				<div className="rounded-2xl border bg-card p-8 text-center">
+				<div className="rounded-md border bg-card p-8 text-center">
 					<p className="text-sm text-muted-foreground">{t("common.loadError")}</p>
 					<Button variant="outline" className="mt-4" onClick={() => refetch()}>
 						{t("common.retry")}
@@ -105,7 +105,7 @@ const Dashboard = () => {
 			) : (
 				<>
 					{/* Today */}
-					<section className="hairline-gold relative overflow-hidden rounded-3xl bg-gradient-hero p-6 text-primary-foreground shadow-elevated sm:p-8">
+					<section className="hairline-gold relative overflow-hidden rounded-md bg-gradient-hero p-6 text-primary-foreground shadow-elevated sm:p-8">
 						<div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-accent/10 blur-2xl" aria-hidden />
 						<p className="eyebrow text-primary-foreground/60">{meta.business_name ?? "Style2Fit"}</p>
 						{isLoading ? (
@@ -117,13 +117,13 @@ const Dashboard = () => {
 							</>
 						)}
 						<div className="mt-6 flex flex-wrap gap-2">
-							<Button className="h-11 rounded-full bg-accent px-5 text-accent-foreground shadow-gold hover:bg-accent/90" asChild>
+							<Button className="h-11 rounded-md bg-accent px-5 text-accent-foreground shadow-gold hover:bg-accent/90" asChild>
 								<Link to="/orders/new">
 									<Plus className="h-4 w-4" />
 									{t("nav.newOrder")}
 								</Link>
 							</Button>
-							<Button variant="ghost" className="h-11 rounded-full border border-white/20 px-5 text-primary-foreground hover:bg-white/10 hover:text-primary-foreground" asChild>
+							<Button variant="ghost" className="h-11 rounded-md border border-white/20 px-5 text-primary-foreground hover:bg-white/10 hover:text-primary-foreground" asChild>
 								<Link to="/quick-measure">
 									<Ruler className="h-4 w-4" />
 									{t("dashboard.measure")}
@@ -135,7 +135,7 @@ const Dashboard = () => {
 					{/* Stats */}
 					<section aria-label={t("dashboard.summary")} className="grid grid-cols-2 gap-3 lg:grid-cols-4">
 						{stats.map((s) => (
-							<div key={s.label} className="rounded-2xl border bg-card p-4 shadow-card">
+							<div key={s.label} className="rounded-md border bg-card p-4 shadow-card">
 								<div className="flex items-center justify-between">
 									<p className="text-xs font-medium text-muted-foreground">{s.label}</p>
 									<s.icon className="h-4 w-4 text-accent" aria-hidden />
@@ -146,7 +146,7 @@ const Dashboard = () => {
 					</section>
 
 					{data && !setupDone && (
-						<section className="rounded-3xl border border-accent/30 bg-accent-soft/60 p-5 sm:p-6">
+						<section className="rounded-md border border-accent/30 bg-accent-soft/60 p-5 sm:p-6">
 							<h2 className="font-display text-xl">{t("dashboard.setupTitle")}</h2>
 							<p className="mt-1 text-sm text-muted-foreground">{t("dashboard.setupBody")}</p>
 							<ol className="mt-4 grid gap-2 sm:grid-cols-3">
@@ -155,7 +155,7 @@ const Dashboard = () => {
 										<Link
 											to={s.to}
 											className={cn(
-												"flex h-full items-center gap-3 rounded-2xl border bg-card p-3 text-sm shadow-card transition-colors hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+												"flex h-full items-center gap-3 rounded-md border bg-card p-3 text-sm shadow-card transition-colors hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
 												s.done && "opacity-60"
 											)}
 										>
@@ -185,11 +185,11 @@ const Dashboard = () => {
 							</SectionTitle>
 							{isLoading ? (
 								<div className="space-y-3">
-									<Skeleton className="h-24 rounded-2xl" />
-									<Skeleton className="h-24 rounded-2xl" />
+									<Skeleton className="h-24 rounded-md" />
+									<Skeleton className="h-24 rounded-md" />
 								</div>
 							) : upNext.length === 0 ? (
-								<p className="rounded-2xl border border-dashed bg-card p-8 text-center text-sm text-muted-foreground">{t("dashboard.upNextEmpty")}</p>
+								<p className="rounded-md border border-dashed bg-card p-8 text-center text-sm text-muted-foreground">{t("dashboard.upNextEmpty")}</p>
 							) : (
 								<ul className="space-y-3">
 									{upNext.map((o) => (
@@ -201,7 +201,7 @@ const Dashboard = () => {
 							)}
 						</section>
 
-						<section aria-label={t("dashboard.moneyTitle")} className="h-fit rounded-3xl border bg-card p-5 shadow-card">
+						<section aria-label={t("dashboard.moneyTitle")} className="h-fit rounded-md border bg-card p-5 shadow-card">
 							<div className="flex items-center gap-2">
 								<Wallet className="h-4 w-4 text-accent" aria-hidden />
 								<h2 className="eyebrow">{t("dashboard.moneyTitle")}</h2>

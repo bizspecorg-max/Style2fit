@@ -92,7 +92,7 @@ export function EditOrderDialog({ open, onOpenChange, order, onSaved }: { open: 
 							<legend className="text-sm font-medium">{t("orders.edit.measurements")}</legend>
 							<div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
 								{fields.map((f) => (
-									<div key={f.key} className="space-y-1 rounded-2xl bg-muted/50 p-2.5">
+									<div key={f.key} className="space-y-1 rounded-md bg-muted/50 p-2.5">
 										<Label htmlFor={`edit-m-${f.key}`} className="block truncate text-xs text-muted-foreground">
 											{f.label}
 										</Label>
@@ -112,7 +112,7 @@ export function EditOrderDialog({ open, onOpenChange, order, onSaved }: { open: 
 						</fieldset>
 					)}
 					{error && (
-						<p role="alert" className="rounded-2xl bg-destructive/10 p-3 text-sm text-destructive">
+						<p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
 							{error}
 						</p>
 					)}

@@ -22,11 +22,11 @@ const NotFound = () => {
 			<h1 className="mt-4 font-display text-3xl">{t("notFound.title")}</h1>
 			<p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">{t("notFound.body")}</p>
 			<div className="mt-8 flex flex-wrap justify-center gap-2">
-				<Button variant="outline" className="h-12 rounded-full bg-card px-6" onClick={() => navigate(-1)}>
+				<Button variant="outline" className="h-12 rounded-md bg-card px-6" onClick={() => navigate(-1)}>
 					<ArrowLeft className="h-4 w-4" />
 					{t("notFound.back")}
 				</Button>
-				<Button className="h-12 rounded-full px-6" asChild>
+				<Button className="h-12 rounded-md px-6" asChild>
 					<Link to="/">{t("notFound.home")}</Link>
 				</Button>
 			</div>

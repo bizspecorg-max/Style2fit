@@ -45,8 +45,8 @@ const ResetPassword = () => {
 				<Link to="/" className="inline-flex rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
 					<Logo />
 				</Link>
-				<div className="rounded-3xl border bg-card p-6 shadow-card sm:p-8">
-					<span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft text-accent" aria-hidden>
+				<div className="rounded-md border bg-card p-6 shadow-card sm:p-8">
+					<span className="flex h-12 w-12 items-center justify-center rounded-md bg-accent-soft text-accent" aria-hidden>
 						<KeyRound className="h-5 w-5" />
 					</span>
 					<h1 className="mt-5 font-display text-3xl leading-tight">{t("resetPage.title")}</h1>
@@ -57,7 +57,7 @@ const ResetPassword = () => {
 					) : !user ? (
 						<div className="mt-2 space-y-6">
 							<p className="text-sm leading-relaxed text-muted-foreground">{t("resetPage.expired")}</p>
-							<Button className="h-12 w-full rounded-full" asChild>
+							<Button className="h-12 w-full rounded-md" asChild>
 								<Link to="/auth">{t("resetPage.backToSignIn")}</Link>
 							</Button>
 						</div>
@@ -74,11 +74,11 @@ const ResetPassword = () => {
 								<PasswordField id="confirm-password" value={confirm} onChange={setConfirm} autoComplete="new-password" />
 							</div>
 							{error && (
-								<p role="alert" className="rounded-2xl bg-destructive/10 p-3 text-sm text-destructive">
+								<p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
 									{error}
 								</p>
 							)}
-							<Button type="submit" className="h-12 w-full rounded-full text-base shadow-soft" disabled={saving}>
+							<Button type="submit" className="h-12 w-full rounded-md text-base shadow-soft" disabled={saving}>
 								{saving && <Loader2 className="h-4 w-4 animate-spin" />}
 								{t("resetPage.save")}
 							</Button>

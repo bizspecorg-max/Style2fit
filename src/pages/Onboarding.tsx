@@ -69,7 +69,7 @@ const Onboarding = () => {
 		<div className="min-h-dvh bg-background px-5 py-8 sm:py-14">
 			<div className="mx-auto w-full max-w-md space-y-8">
 				<Logo />
-				<div className="rounded-3xl border bg-card p-6 shadow-card sm:p-8">
+				<div className="rounded-md border bg-card p-6 shadow-card sm:p-8">
 					<p className="eyebrow text-accent">{t("onboarding.eyebrow")}</p>
 					<h1 className="mt-2 font-display text-3xl leading-tight">{t("onboarding.title")}</h1>
 					<p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("onboarding.subtitle")}</p>
@@ -89,7 +89,7 @@ const Onboarding = () => {
 								}}
 								errors={errors}
 							/>
-							<Button type="submit" className="h-12 w-full rounded-full text-base shadow-soft" disabled={saving}>
+							<Button type="submit" className="h-12 w-full rounded-md text-base shadow-soft" disabled={saving}>
 								{saving && <Loader2 className="h-4 w-4 animate-spin" />}
 								{saving ? t("onboarding.saving") : t("onboarding.save")}
 							</Button>

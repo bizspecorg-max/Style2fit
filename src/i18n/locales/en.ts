@@ -200,6 +200,23 @@ const en = {
 		},
 	},
 	orders: {
+		col: {
+			code: "Order",
+			customer: "Customer",
+			style: "Style",
+			due: "Due",
+			status: "Status",
+			payment: "Payment",
+			price: "Price",
+			actions: "",
+			actionsFor: "Actions for order {{code}}",
+		},
+		actions: {
+			view: "Open order",
+			edit: "Edit order",
+			message: "Message customer",
+			repeat: "New order for this customer",
+		},
 		count_one: "{{count}} order",
 		count_other: "{{count}} orders",
 		all: "All",
@@ -313,6 +330,7 @@ const en = {
 		},
 	},
 	styles: {
+		col: { style: "Style", category: "Category", fields: "Measures", added: "Added", actions: "" },
 		count_one: "{{count}} style",
 		count_other: "{{count}} styles",
 		new: "New style",
@@ -371,6 +389,7 @@ const en = {
 		},
 	},
 	quick: {
+		col: { measurement: "Measurement", taken: "Taken", actions: "", actionsFor: "Actions for {{name}}" },
 		subtitle: "Measure anyone in seconds. Measurements are saved to the customer's profile.",
 		searchMore_one: "{{count}} more customer — search to find them.",
 		searchMore_other: "{{count}} more customers — search to find them.",
@@ -477,6 +496,23 @@ const en = {
 	},
 	customers: {
 		title: "Customers",
+		col: {
+			name: "Customer",
+			phone: "Phone",
+			email: "Email",
+			orders: "Orders",
+			measurements: "Measures",
+			added: "Added",
+			actions: "",
+		},
+		actions: {
+			label: "Actions for {{name}}",
+			view: "Open customer",
+			newOrder: "New order",
+			measure: "Take measurements",
+			message: "Message on WhatsApp",
+			edit: "Edit details",
+		},
 		count_one: "{{count}} customer",
 		count_other: "{{count}} customers",
 		add: "Add customer",

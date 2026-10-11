@@ -34,7 +34,7 @@ export function OrderRow({ order, showPayment = true, titleFrom = "customer" }: 
 		<Link
 			to={`/orders/${order.id}`}
 			className={cn(
-				"group flex items-center gap-3 rounded-2xl border bg-card p-3 shadow-card transition-all duration-200 sm:gap-4 sm:p-4",
+				"group flex items-center gap-3 rounded-md border bg-card p-3 shadow-card transition-all duration-200 sm:gap-4 sm:p-4",
 				"hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
 				isOverdue(order) && "border-status-overdue/25"
 			)}

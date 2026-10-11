@@ -200,7 +200,7 @@ export const AppLayout = () => {
 				</div>
 			</header>
 
-			<main id="main" tabIndex={-1} className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 focus:outline-none md:px-8 md:pb-12 md:pt-10">
+			<main id="main" tabIndex={-1} className="mx-auto w-full max-w-[90rem] px-4 pb-28 pt-5 focus:outline-none md:px-7 md:pb-14 md:pt-7 xl:px-10">
 				<Suspense fallback={<PageFallback />}>
 					<Outlet />
 				</Suspense>
@@ -218,7 +218,7 @@ export const AppLayout = () => {
 						<Link
 							to="/orders/new"
 							aria-label={t("nav.newOrder")}
-							className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-soft transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+							className="flex h-11 w-11 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-soft transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 						>
 							<Plus className="h-5 w-5" />
 						</Link>

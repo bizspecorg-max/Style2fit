@@ -20,7 +20,7 @@ export function Dialog({ children, ...props }: RootProps) {
 
 export function DialogContent({ className, children }: { className?: string; children: React.ReactNode }) {
 	const mobile = React.useContext(MobileContext);
-	if (!mobile) return <D.DialogContent className={cn("rounded-3xl", className)}>{children}</D.DialogContent>;
+	if (!mobile) return <D.DialogContent className={cn("rounded-md", className)}>{children}</D.DialogContent>;
 	return (
 		<V.DrawerContent className="max-h-[94dvh] rounded-t-3xl">
 			<div className="min-h-0 flex-1 overflow-y-auto px-5 pt-2">{children}</div>
@@ -39,7 +39,7 @@ export function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLD
 	// Sticks to the bottom of the sheet so the main button is always within thumb reach.
 	return (
 		<div
-			className="sticky bottom-0 -mx-5 mt-6 flex flex-col-reverse gap-2 border-t bg-background px-5 pb-[max(env(safe-area-inset-bottom),1rem)] pt-3 [&>*]:h-12 [&>*]:w-full [&>*]:rounded-full"
+			className="sticky bottom-0 -mx-5 mt-6 flex flex-col-reverse gap-2 border-t bg-background px-5 pb-[max(env(safe-area-inset-bottom),1rem)] pt-3 [&>*]:h-12 [&>*]:w-full [&>*]:rounded-md"
 			{...props}
 		/>
 	);

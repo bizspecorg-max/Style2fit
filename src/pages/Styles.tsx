@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { DiscoverPanel } from "@/components/DiscoverPanel";
 import { StyleDialog } from "@/components/StyleDialog";
 import { EmptyState, PageHeader } from "@/components/ui-kit";
+import { DataTable, RowNum, TBody, TD, TH, THead, TR } from "@/components/DataTable";
+import { RowActions } from "@/components/RowActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,6 +28,7 @@ import {
 import type { Category } from "@/lib/measurementTemplates";
 import { fieldsForStyle } from "@/lib/orders";
 import { useStyles, type StyleRow } from "@/lib/styles";
+import { formatDate, useShop } from "@/lib/shop";
 import { cn } from "@/lib/utils";
 
 type Initial = { name: string; category: Category; image_url: string };
@@ -39,6 +42,7 @@ const Styles = () => {
 	const [category, setCategory] = useState("all");
 	const [dialog, setDialog] = useState<{ open: boolean; style: StyleRow | null; initial: Initial | null }>({ open: false, style: null, initial: null });
 	const [deleting, setDeleting] = useState<StyleRow | null>(null);
+	const shop = useShop();
 
 	useEffect(() => {
 		document.title = `${t("nav.styles")} · Style2Fit`;
@@ -63,7 +67,7 @@ const Styles = () => {
 		refresh();
 	};
 
-	const tabTrigger = "h-10 flex-1 gap-1.5 rounded-full px-4 data-[state=active]:shadow-card sm:flex-none";
+	const tabTrigger = "h-10 flex-1 gap-1.5 rounded-md px-4 data-[state=active]:shadow-card sm:flex-none";
 
 	return (
 		<div className="space-y-6">
@@ -71,7 +75,7 @@ const Styles = () => {
 				title={t("nav.styles")}
 				subtitle={t("styles.count", { count: styles.length })}
 				actions={
-					<Button className="h-11 rounded-full px-5" onClick={openNew}>
+					<Button className="h-11 rounded-md px-5" onClick={openNew}>
 						<Plus className="h-4 w-4" />
 						{t("styles.new")}
 					</Button>
@@ -79,7 +83,7 @@ const Styles = () => {
 			/>
 
 			<Tabs value={tab} onValueChange={(v) => setTab(v as "mine" | "discover")}>
-				<TabsList className="h-12 w-full rounded-full bg-muted p-1 sm:w-auto">
+				<TabsList className="h-12 w-full rounded-md bg-muted p-1 sm:w-auto">
 					<TabsTrigger value="mine" className={tabTrigger}>
 						<Shirt className="h-4 w-4" />
 						{t("styles.tabs.mine")}
@@ -95,7 +99,7 @@ const Styles = () => {
 						<div className="space-y-3">
 							<div className="relative">
 								<Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-								<Input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("styles.search")} aria-label={t("styles.search")} className="h-12 rounded-full bg-card pl-11 shadow-card" />
+								<Input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("styles.search")} aria-label={t("styles.search")} className="h-12 rounded-md bg-card pl-11 shadow-card" />
 							</div>
 							{categories.length > 1 && (
 								<div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:px-0" role="group" aria-label={t("styles.category")}>
@@ -106,7 +110,7 @@ const Styles = () => {
 											aria-pressed={category === c}
 											onClick={() => setCategory(c)}
 											className={cn(
-												"h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+												"h-10 shrink-0 rounded-md border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
 												category === c ? "border-primary bg-primary text-primary-foreground shadow-card" : "bg-card hover:border-primary/30"
 											)}
 										>
@@ -121,11 +125,11 @@ const Styles = () => {
 					{isLoading ? (
 						<div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4" role="status" aria-label={t("common.loading")}>
 							{[0, 1, 2, 3].map((i) => (
-								<Skeleton key={i} className="aspect-[3/4] rounded-3xl" />
+								<Skeleton key={i} className="aspect-[3/4] rounded-md" />
 							))}
 						</div>
 					) : isError ? (
-						<div className="rounded-3xl border bg-card p-8 text-center">
+						<div className="rounded-md border bg-card p-8 text-center">
 							<p className="text-sm text-muted-foreground">{t("common.loadError")}</p>
 							<Button variant="outline" className="mt-4" onClick={() => refetch()}>
 								{t("common.retry")}
@@ -138,11 +142,11 @@ const Styles = () => {
 							body={t("styles.emptyBody")}
 							action={
 								<div className="flex flex-wrap justify-center gap-2">
-									<Button className="h-11 rounded-full px-6" onClick={openNew}>
+									<Button className="h-11 rounded-md px-6" onClick={openNew}>
 										<Plus className="h-4 w-4" />
 										{t("styles.first")}
 									</Button>
-									<Button variant="outline" className="h-11 rounded-full bg-card px-6" onClick={() => setTab("discover")}>
+									<Button variant="outline" className="h-11 rounded-md bg-card px-6" onClick={() => setTab("discover")}>
 										<Compass className="h-4 w-4" />
 										{t("styles.tabs.discover")}
 									</Button>
@@ -150,15 +154,61 @@ const Styles = () => {
 							}
 						/>
 					) : filtered.length === 0 ? (
-						<p className="rounded-3xl border bg-card p-8 text-center text-sm text-muted-foreground">{t("styles.noMatch")}</p>
+						<p className="rounded-md border bg-card p-8 text-center text-sm text-muted-foreground">{t("styles.noMatch")}</p>
 					) : (
-						<ul className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 xl:grid-cols-4">
+						<>
+						<DataTable>
+							<THead>
+								<TR className="hover:bg-transparent">
+									<TH numeric className="w-12">#</TH>
+									<TH>{t("styles.col.style")}</TH>
+									<TH>{t("styles.col.category")}</TH>
+									<TH numeric>{t("styles.col.fields")}</TH>
+									<TH>{t("styles.col.added")}</TH>
+									<TH className="w-14 text-right">{t("styles.col.actions")}</TH>
+								</TR>
+							</THead>
+							<TBody>
+								{filtered.map((st, i) => (
+									<TR key={st.id}>
+										<RowNum n={i + 1} />
+										<TD>
+											<button type="button" onClick={() => openEdit(st)} className="flex items-center gap-3 text-left font-semibold hover:underline">
+												{st.image_url ? (
+													<img src={st.image_url} alt="" loading="lazy" className="h-10 w-8 shrink-0 rounded-sm bg-muted object-cover" />
+												) : (
+													<span className="flex h-10 w-8 shrink-0 items-center justify-center rounded-sm bg-muted">
+														<Shirt className="h-4 w-4 text-muted-foreground/60" aria-hidden />
+													</span>
+												)}
+												<span className="truncate">{st.name}</span>
+											</button>
+										</TD>
+										<TD className="text-muted-foreground">{st.category}</TD>
+										<TD numeric>{fieldsForStyle(st).length}</TD>
+										<TD className="whitespace-nowrap text-muted-foreground">{formatDate(st.created_at, shop.locale)}</TD>
+										<TD className="text-right">
+											<RowActions
+												label={t("styles.actions", { name: st.name })}
+												actions={[
+													{ label: t("styles.useForOrder"), icon: ClipboardList, to: `/orders/new?style=${st.id}` },
+													{ label: t("common.edit"), icon: Pencil, onSelect: () => openEdit(st) },
+													{ label: t("styles.delete"), icon: Trash2, danger: true, onSelect: () => setDeleting(st) },
+												]}
+											/>
+										</TD>
+									</TR>
+								))}
+							</TBody>
+						</DataTable>
+
+						<ul className="grid grid-cols-2 gap-3 sm:gap-5 md:hidden">
 							{filtered.map((s) => (
 								<li key={s.id} className="group relative">
 									<button
 										type="button"
 										onClick={() => openEdit(s)}
-										className="block w-full overflow-hidden rounded-3xl bg-muted text-left shadow-card transition-shadow duration-300 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+										className="block w-full overflow-hidden rounded-md bg-muted text-left shadow-card transition-shadow duration-300 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 									>
 										<span className="relative block aspect-[3/4]">
 											{s.image_url ? (
@@ -210,6 +260,7 @@ const Styles = () => {
 								</li>
 							))}
 						</ul>
+						</>
 					)}
 				</TabsContent>
 
@@ -238,7 +289,7 @@ const Styles = () => {
 			/>
 
 			<AlertDialog open={!!deleting} onOpenChange={(open) => !open && setDeleting(null)}>
-				<AlertDialogContent className="rounded-3xl">
+				<AlertDialogContent className="rounded-md">
 					<AlertDialogHeader>
 						<AlertDialogTitle>{t("styles.deleteTitle", { name: deleting?.name })}</AlertDialogTitle>
 						<AlertDialogDescription>{t("styles.deleteBody")}</AlertDialogDescription>
