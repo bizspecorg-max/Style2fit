@@ -200,10 +200,10 @@ const Orders = () => {
 					{groups.map((g) => (
 						<section key={g.key} aria-label={g.key === "results" ? undefined : t(`orders.group.${g.key}`)}>
 							{g.key !== "results" && <SectionTitle count={g.items.length}>{t(`orders.group.${g.key}`)}</SectionTitle>}
-							<ul className="space-y-3">
+							<ul className="divide-y overflow-hidden rounded-md border bg-card shadow-card">
 								{g.items.map((o) => (
 									<li key={o.id}>
-										<OrderRow order={o} />
+										<OrderRow order={o} flat />
 									</li>
 								))}
 							</ul>
