@@ -200,7 +200,7 @@ export const AppLayout = () => {
 				</div>
 			</header>
 
-			<main id="main" tabIndex={-1} className="mx-auto w-full max-w-[90rem] px-4 pb-28 pt-5 focus:outline-none md:px-7 md:pb-14 md:pt-7 xl:px-10">
+			<main id="main" tabIndex={-1} className="mx-auto w-full max-w-[90rem] px-4 pb-24 pt-5 focus:outline-none md:px-7 md:pb-10 md:pt-7 xl:px-10">
 				<Suspense fallback={<PageFallback />}>
 					<Outlet />
 				</Suspense>

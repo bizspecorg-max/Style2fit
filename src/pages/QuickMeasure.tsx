@@ -76,11 +76,11 @@ const QuickMeasure = () => {
 	};
 
 	return (
-		<div className="mx-auto max-w-3xl space-y-8">
+		<div className="space-y-6">
 			<PageHeader title={t("nav.quickMeasure")} subtitle={t("quick.subtitle")} />
 
-			<section className="space-y-4 rounded-md border bg-card p-4 shadow-card sm:p-6">
-				<h2 className="font-display text-xl">{t("quick.who")}</h2>
+			<section className="space-y-4">
+				<h2 className="text-base font-semibold">{t("quick.who")}</h2>
 				<div className="flex gap-2">
 					<div className="relative flex-1">
 						<Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
