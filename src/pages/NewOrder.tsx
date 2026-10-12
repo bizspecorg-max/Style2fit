@@ -19,7 +19,7 @@ import { useCustomers } from "@/pages/Customers";
 import { CATEGORIES, TEMPLATES, type Category, type MeasurementField } from "@/lib/measurementTemplates";
 import { PAYMENT_STATUSES, fieldsForStyle, parseMoney, type PaymentStatus } from "@/lib/orders";
 import { useStyles } from "@/lib/styles";
-import { formatDate, formatMoney, formatPhone, useShop } from "@/lib/shop";
+import { currencySign, formatDate, formatMoney, formatPhone, useShop } from "@/lib/shop";
 import { convertInput, normalizeUnit, parseMeasure as parseNumber } from "@/lib/units";
 import { cn } from "@/lib/utils";
 
@@ -119,7 +119,7 @@ const NewOrder = () => {
 	const outfitName = isCustom ? customName.trim() || customCategory || t("orders.flow.customOutfit") : style?.name ?? "";
 	const today = localIso(new Date());
 	const currencySymbol = useMemo(
-		() => new Intl.NumberFormat(shop.locale, { style: "currency", currency: shop.currency }).formatToParts(0).find((p) => p.type === "currency")?.value ?? shop.currency,
+		() => currencySign(shop.locale, shop.currency),
 		[shop.locale, shop.currency]
 	);
 
@@ -296,7 +296,7 @@ const NewOrder = () => {
 	const filledCount = fields.filter((f) => values[f.key]?.trim()).length;
 	const chip = (active: boolean) =>
 		cn(
-			"h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+			"h-10 shrink-0 rounded-md border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
 			active ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:border-primary/30"
 		);
 
@@ -325,14 +325,14 @@ const NewOrder = () => {
 				{STEP_KEYS.map((key, i) => (
 					<li key={key} aria-current={step === i ? "step" : undefined}>
 						<button type="button" disabled={i > step} onClick={() => setStep(i)} className="group w-full text-left disabled:cursor-default">
-							<span className={cn("block h-1 rounded-full transition-colors", i <= step ? "bg-primary" : "bg-border")} />
+							<span className={cn("block h-1 rounded-md transition-colors", i <= step ? "bg-primary" : "bg-border")} />
 							<span className={cn("mt-2 block truncate text-xs font-medium", i === step ? "text-foreground" : "text-muted-foreground")}>{t(`orders.new.steps.${key}`)}</span>
 						</button>
 					</li>
 				))}
 			</ol>
 
-			<section className="rounded-3xl border bg-card p-4 shadow-card sm:p-6">
+			<section className="rounded-md border bg-card p-4 shadow-card sm:p-6">
 				{step === 0 && (
 					<fieldset className="space-y-4">
 						<legend className="sr-only">{t("orders.new.steps.customer")}</legend>
@@ -345,10 +345,10 @@ const NewOrder = () => {
 									onChange={(e) => setCustomerQuery(e.target.value)}
 									placeholder={t("customers.search")}
 									aria-label={t("customers.search")}
-									className="h-12 rounded-full pl-11"
+									className="h-12 rounded-md pl-11"
 								/>
 							</div>
-							<Button type="button" variant="outline" className="h-12 rounded-full px-4" onClick={() => setAddingCustomer(true)}>
+							<Button type="button" variant="outline" className="h-12 rounded-md px-4" onClick={() => setAddingCustomer(true)}>
 								<Plus className="h-4 w-4" />
 								<span className="hidden sm:inline">{t("customers.add")}</span>
 								<span className="sr-only sm:hidden">{t("customers.add")}</span>
@@ -357,11 +357,11 @@ const NewOrder = () => {
 						{loadingCustomers ? (
 							<div className="space-y-2">
 								{[0, 1, 2].map((i) => (
-									<Skeleton key={i} className="h-16 w-full rounded-2xl" />
+									<Skeleton key={i} className="h-16 w-full rounded-md" />
 								))}
 							</div>
 						) : customers.length === 0 ? (
-							<div className="rounded-2xl bg-muted/60 p-6 text-center">
+							<div className="rounded-md bg-muted/60 p-6 text-center">
 								<p className="text-sm text-muted-foreground">{t("orders.new.noCustomers")}</p>
 								<Button className="mt-4 rounded-full" onClick={() => setAddingCustomer(true)}>
 									<Plus className="h-4 w-4" />
@@ -374,7 +374,7 @@ const NewOrder = () => {
 									<label
 										key={c.id}
 										className={cn(
-											"flex cursor-pointer items-center gap-3 rounded-2xl border p-3 transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
+											"flex cursor-pointer items-center gap-3 rounded-md border p-3 transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
 											customerId === c.id ? "border-primary bg-primary/[0.04] ring-1 ring-primary" : "hover:border-primary/30 hover:bg-muted/40"
 										)}
 									>
@@ -407,25 +407,25 @@ const NewOrder = () => {
 						{styles.length > 6 && (
 							<div className="relative">
 								<Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-								<Input type="search" value={styleQuery} onChange={(e) => setStyleQuery(e.target.value)} placeholder={t("orders.flow.searchStyles")} aria-label={t("orders.flow.searchStyles")} className="h-12 rounded-full pl-11" />
+								<Input type="search" value={styleQuery} onChange={(e) => setStyleQuery(e.target.value)} placeholder={t("orders.flow.searchStyles")} aria-label={t("orders.flow.searchStyles")} className="h-12 rounded-md pl-11" />
 							</div>
 						)}
 						{loadingStyles ? (
 							<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
 								{[0, 1, 2].map((i) => (
-									<Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
+									<Skeleton key={i} className="aspect-[3/4] rounded-md" />
 								))}
 							</div>
 						) : (
 							<div className="grid grid-cols-2 gap-3 sm:grid-cols-3" role="radiogroup" aria-label={t("orders.new.steps.style")}>
 								<label
 									className={cn(
-										"flex aspect-[3/4] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed bg-card p-3 text-center transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
+										"flex aspect-[3/4] cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed bg-card p-3 text-center transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
 										isCustom ? "border-primary bg-primary/[0.04]" : "hover:border-primary/40"
 									)}
 								>
 									<input type="radio" name="style" value={CUSTOM} checked={isCustom} onChange={() => pickStyle(CUSTOM)} className="sr-only" />
-									<span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft text-accent" aria-hidden>
+									<span className="flex h-12 w-12 items-center justify-center rounded-md bg-accent-soft text-accent" aria-hidden>
 										<Sparkles className="h-5 w-5" />
 									</span>
 									<span className="mt-3 font-display text-base leading-tight">{t("orders.flow.customOutfit")}</span>
@@ -437,7 +437,7 @@ const NewOrder = () => {
 										<label
 											key={s.id}
 											className={cn(
-												"relative block cursor-pointer overflow-hidden rounded-2xl bg-muted shadow-card transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
+												"relative block cursor-pointer overflow-hidden rounded-md bg-muted shadow-card transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
 												selected ? "ring-2 ring-primary ring-offset-2 ring-offset-card" : "hover:shadow-soft"
 											)}
 										>
@@ -467,7 +467,7 @@ const NewOrder = () => {
 						)}
 
 						{isCustom && (
-							<div className="space-y-4 rounded-2xl border bg-muted/30 p-4">
+							<div className="space-y-4 rounded-md border bg-muted/30 p-4">
 								<fieldset>
 									<legend className="text-sm font-medium">{t("orders.flow.outfitCategory")}</legend>
 									<div className="mt-2 flex flex-wrap gap-2">
@@ -501,11 +501,11 @@ const NewOrder = () => {
 				{step === 2 && (
 					<fieldset className="space-y-4">
 						<legend className="font-display text-xl">{t("orders.new.measureFor", { name: customer?.name ?? "", style: outfitName })}</legend>
-						{prefillNote && <p className="rounded-2xl border border-accent/30 bg-accent-soft/70 p-3 text-sm">{prefillNote}</p>}
+						{prefillNote && <p className="rounded-md border border-accent/30 bg-accent-soft/70 p-3 text-sm">{prefillNote}</p>}
 						{fields.length > 0 && (
 							<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
 								{fields.map((f) => (
-									<div key={f.key} className="space-y-1.5 rounded-2xl bg-muted/50 p-3">
+									<div key={f.key} className="space-y-1.5 rounded-md bg-muted/50 p-3">
 										<div className="flex items-center justify-between gap-1">
 											<Label htmlFor={`m-${f.key}`} className="block truncate text-xs text-muted-foreground">
 												{f.label}
@@ -536,7 +536,7 @@ const NewOrder = () => {
 							</div>
 						)}
 
-						<div className="rounded-2xl border border-dashed p-3 sm:p-4">
+						<div className="rounded-md border border-dashed p-3 sm:p-4">
 							<Label htmlFor="new-field" className="text-sm font-medium">
 								{t("orders.flow.addMeasurement")}
 							</Label>
@@ -552,9 +552,9 @@ const NewOrder = () => {
 										}
 									}}
 									placeholder={t("orders.flow.addMeasurementPlaceholder")}
-									className="h-11 rounded-full"
+									className="h-11 rounded-md"
 								/>
-								<Button type="button" variant="outline" className="h-11 shrink-0 rounded-full" onClick={() => addField(newLabel)} disabled={!newLabel.trim()}>
+								<Button type="button" variant="outline" className="h-11 shrink-0 rounded-md" onClick={() => addField(newLabel)} disabled={!newLabel.trim()}>
 									<Plus className="h-4 w-4" />
 									{t("orders.flow.add")}
 								</Button>
@@ -567,7 +567,7 @@ const NewOrder = () => {
 											key={s}
 											type="button"
 											onClick={() => addField(s)}
-											className="h-8 rounded-full border bg-card px-3 text-xs font-medium transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+											className="h-8 rounded-md border bg-card px-3 text-xs font-medium transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 										>
 											+ {s}
 										</button>
@@ -620,7 +620,7 @@ const NewOrder = () => {
 									<label
 										key={p}
 										className={cn(
-											"flex h-10 cursor-pointer items-center justify-center rounded-full text-sm font-medium transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
+											"flex h-10 cursor-pointer items-center justify-center rounded-md text-sm font-medium transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring",
 											payment === p ? "bg-card text-foreground shadow-card" : "text-muted-foreground hover:text-foreground"
 										)}
 									>
@@ -635,7 +635,7 @@ const NewOrder = () => {
 							<Textarea id="order-notes" rows={3} maxLength={1000} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t("orders.new.notesPlaceholder")} />
 						</div>
 
-						<div className="flex gap-4 rounded-2xl border bg-muted/40 p-4">
+						<div className="flex gap-4 rounded-md border bg-muted/40 p-4">
 							<span className="flex h-24 w-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted">
 								{style?.image_url ? <img src={style.image_url} alt="" className="h-full w-full object-cover" /> : <Shirt className="h-6 w-6 text-muted-foreground" aria-hidden />}
 							</span>
@@ -662,7 +662,7 @@ const NewOrder = () => {
 				)}
 
 				{error && (
-					<p role="alert" className="mt-5 rounded-2xl bg-destructive/10 p-3 text-sm text-destructive">
+					<p role="alert" className="mt-5 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
 						{error}
 					</p>
 				)}
@@ -672,17 +672,17 @@ const NewOrder = () => {
 			<div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t bg-background/95 px-4 py-3 backdrop-blur md:static md:border-0 md:bg-transparent md:p-0">
 				<div className="mx-auto flex max-w-3xl gap-2">
 					{step > 0 && (
-						<Button type="button" variant="outline" className="h-12 rounded-full bg-card px-5" onClick={() => setStep(step - 1)} disabled={saving}>
+						<Button type="button" variant="outline" className="h-12 rounded-md bg-card px-5" onClick={() => setStep(step - 1)} disabled={saving}>
 							<ArrowLeft className="h-4 w-4" />
 							{t("signup.back")}
 						</Button>
 					)}
 					{step < STEP_KEYS.length - 1 ? (
-						<Button type="button" className="h-12 flex-1 rounded-full text-base shadow-soft" onClick={next}>
+						<Button type="button" className="h-12 flex-1 rounded-md text-base shadow-soft" onClick={next}>
 							{t("signup.continue")}
 						</Button>
 					) : (
-						<Button type="button" className="h-12 flex-1 rounded-full text-base shadow-soft" onClick={create} disabled={saving}>
+						<Button type="button" className="h-12 flex-1 rounded-md text-base shadow-soft" onClick={create} disabled={saving}>
 							{saving && <Loader2 className="h-4 w-4 animate-spin" />}
 							{t("orders.new.create")}
 						</Button>

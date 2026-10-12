@@ -79,15 +79,15 @@ const OrderDetail = () => {
 			<div className="space-y-4" role="status" aria-label={t("common.loading")}>
 				<Skeleton className="h-5 w-28" />
 				<Skeleton className="h-12 w-64" />
-				<Skeleton className="h-64 w-full rounded-3xl" />
-				<Skeleton className="h-40 w-full rounded-3xl" />
+				<Skeleton className="h-64 w-full rounded-md" />
+				<Skeleton className="h-40 w-full rounded-md" />
 			</div>
 		);
 	}
 
 	if (isError || !order) {
 		return (
-			<div className="rounded-3xl border bg-card p-8 text-center">
+			<div className="rounded-md border bg-card p-8 text-center">
 				<p className="text-sm text-muted-foreground">{isError ? t("common.loadError") : t("orders.detail.notFound")}</p>
 				<div className="mt-4 flex justify-center gap-2">
 					{isError && (
@@ -175,7 +175,7 @@ const OrderDetail = () => {
 			</header>
 
 			{/* Summary: photo, price, pickup and progress */}
-			<section className="grid overflow-hidden rounded-3xl border bg-card shadow-card sm:grid-cols-[15rem_1fr]">
+			<section className="grid overflow-hidden rounded-md border bg-card shadow-card sm:grid-cols-[15rem_1fr]">
 				<div className="flex aspect-[4/3] items-center justify-center bg-muted sm:aspect-auto">
 					{image ? <img src={image} alt={styleName} className="h-full w-full object-cover" /> : <Shirt className="h-10 w-10 text-muted-foreground" aria-hidden />}
 				</div>
@@ -219,11 +219,11 @@ const OrderDetail = () => {
 
 					<div className="mt-6 hidden gap-2 md:flex print:!hidden">
 						{upcoming && (
-							<Button className="h-11 flex-1 rounded-full" disabled={!!busy} onClick={advance}>
+							<Button className="h-11 flex-1 rounded-md" disabled={!!busy} onClick={advance}>
 								{advanceLabel}
 							</Button>
 						)}
-						<Button variant="outline" className={cn("h-11 flex-1 rounded-full", WHATSAPP)} asChild>
+						<Button variant="outline" className={cn("h-11 flex-1 rounded-md", WHATSAPP)} asChild>
 							<a href={whatsappLink(phone, message)} target="_blank" rel="noreferrer">
 								<MessageCircle className="h-4 w-4" />
 								{whatsappLabel}
@@ -235,7 +235,7 @@ const OrderDetail = () => {
 
 			<div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
 				<div className="space-y-6">
-					<section className="rounded-3xl border bg-card p-5 shadow-card sm:p-6">
+					<section className="rounded-md border bg-card p-5 shadow-card sm:p-6">
 						<div className="flex items-center justify-between gap-2">
 							<h2 className="font-display text-xl">{t("orders.detail.measurements")}</h2>
 							<Button variant="ghost" size="sm" className="-mr-2 rounded-full print:hidden" onClick={() => setEditing(true)}>
@@ -248,7 +248,7 @@ const OrderDetail = () => {
 						) : (
 							<dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
 								{measurements.map((m) => (
-									<div key={m.label} className="rounded-2xl bg-muted/60 px-3.5 py-2.5">
+									<div key={m.label} className="rounded-md bg-muted/60 px-3.5 py-2.5">
 										<dt className="truncate text-xs text-muted-foreground">{m.label}</dt>
 										<dd className="mt-0.5 font-display text-lg tabular-nums">{m.value}</dd>
 									</div>
@@ -257,7 +257,7 @@ const OrderDetail = () => {
 						)}
 					</section>
 					{order.notes && (
-						<section className="rounded-3xl border bg-card p-5 shadow-card sm:p-6">
+						<section className="rounded-md border bg-card p-5 shadow-card sm:p-6">
 							<h2 className="font-display text-xl">{t("orders.detail.notes")}</h2>
 							<p className="mt-2 whitespace-pre-line text-sm leading-relaxed">{order.notes}</p>
 						</section>
@@ -265,7 +265,7 @@ const OrderDetail = () => {
 				</div>
 
 				<aside className="space-y-6">
-					<section className="rounded-3xl border bg-card p-5 shadow-card print:hidden">
+					<section className="rounded-md border bg-card p-5 shadow-card print:hidden">
 						<h2 className="eyebrow">{t("orders.new.payment")}</h2>
 						<div className="mt-3 grid grid-cols-3 gap-1 rounded-full bg-muted p-1" role="radiogroup" aria-label={t("orders.new.payment")}>
 							{PAYMENT_STATUSES.map((p) => (
@@ -277,7 +277,7 @@ const OrderDetail = () => {
 									disabled={!!busy}
 									onClick={() => order.payment_status !== p && update({ payment_status: p }, "payment")}
 									className={cn(
-										"h-10 rounded-full text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+										"h-10 rounded-md text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
 										order.payment_status === p ? "bg-card text-foreground shadow-card" : "text-muted-foreground hover:text-foreground"
 									)}
 								>
@@ -287,9 +287,9 @@ const OrderDetail = () => {
 						</div>
 					</section>
 
-					<section className="rounded-3xl border bg-card p-5 shadow-card">
+					<section className="rounded-md border bg-card p-5 shadow-card">
 						<h2 className="eyebrow">{t("orders.new.steps.customer")}</h2>
-						<Link to={`/customers/${order.customer_id}`} className="mt-3 flex items-center gap-3 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+						<Link to={`/customers/${order.customer_id}`} className="mt-3 flex items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
 							<Avatar name={customerName || "?"} />
 							<span className="min-w-0">
 								<span className="block truncate font-semibold">{customerName}</span>
@@ -298,13 +298,13 @@ const OrderDetail = () => {
 						</Link>
 						{phone && (
 							<div className="mt-4 grid grid-cols-2 gap-2 print:hidden">
-								<Button variant="outline" className="h-10 rounded-full" asChild>
+								<Button variant="outline" className="h-10 rounded-md" asChild>
 									<a href={`tel:${phone}`}>
 										<Phone className="h-4 w-4" />
 										{t("customers.call")}
 									</a>
 								</Button>
-								<Button variant="outline" className={cn("h-10 rounded-full", WHATSAPP)} asChild>
+								<Button variant="outline" className={cn("h-10 rounded-md", WHATSAPP)} asChild>
 									<a href={whatsappLink(phone)} target="_blank" rel="noreferrer">
 										<MessageCircle className="h-4 w-4" />
 										{t("customers.whatsapp")}
@@ -319,7 +319,7 @@ const OrderDetail = () => {
 			<MobileActionBar>
 				{upcoming ? (
 					<>
-						<Button className="h-12 flex-1 rounded-full" disabled={!!busy} onClick={advance}>
+						<Button className="h-12 flex-1 rounded-md" disabled={!!busy} onClick={advance}>
 							{advanceLabel}
 						</Button>
 						<Button variant="outline" size="icon" className={cn("h-12 w-12 shrink-0 rounded-full", WHATSAPP)} aria-label={whatsappLabel} asChild>
@@ -329,7 +329,7 @@ const OrderDetail = () => {
 						</Button>
 					</>
 				) : (
-					<Button variant="outline" className={cn("h-12 flex-1 rounded-full", WHATSAPP)} asChild>
+					<Button variant="outline" className={cn("h-12 flex-1 rounded-md", WHATSAPP)} asChild>
 						<a href={whatsappLink(phone, message)} target="_blank" rel="noreferrer">
 							<MessageCircle className="h-4 w-4" />
 							{whatsappLabel}
@@ -341,7 +341,7 @@ const OrderDetail = () => {
 			<EditOrderDialog open={editing} onOpenChange={setEditing} order={order} onSaved={refresh} />
 
 			<AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-				<AlertDialogContent className="rounded-3xl">
+				<AlertDialogContent className="rounded-md">
 					<AlertDialogHeader>
 						<AlertDialogTitle>{t("orders.detail.deleteTitle", { code })}</AlertDialogTitle>
 						<AlertDialogDescription>{t("orders.detail.deleteBody")}</AlertDialogDescription>

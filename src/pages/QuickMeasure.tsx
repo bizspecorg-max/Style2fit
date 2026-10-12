@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { CustomerFormDialog, type Customer } from "@/components/CustomerFormDialog";
 import { MeasurementDialog, type MeasurementRecord } from "@/components/MeasurementDialog";
+import { DataTable, RowNum, TBody, TD, TH, THead, TR } from "@/components/DataTable";
+import { RowActions } from "@/components/RowActions";
 import { Avatar, PageHeader, SectionTitle } from "@/components/ui-kit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,17 +76,17 @@ const QuickMeasure = () => {
 	};
 
 	return (
-		<div className="mx-auto max-w-3xl space-y-8">
+		<div className="space-y-6">
 			<PageHeader title={t("nav.quickMeasure")} subtitle={t("quick.subtitle")} />
 
-			<section className="space-y-4 rounded-3xl border bg-card p-4 shadow-card sm:p-6">
-				<h2 className="font-display text-xl">{t("quick.who")}</h2>
+			<section className="space-y-4">
+				<h2 className="text-base font-semibold">{t("quick.who")}</h2>
 				<div className="flex gap-2">
 					<div className="relative flex-1">
 						<Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-						<Input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("customers.search")} aria-label={t("customers.search")} className="h-12 rounded-full pl-11" />
+						<Input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("customers.search")} aria-label={t("customers.search")} className="h-12 rounded-md pl-11" />
 					</div>
-					<Button variant="outline" className="h-12 rounded-full px-4" onClick={() => setAdding(true)}>
+					<Button variant="outline" className="h-12 rounded-md px-4" onClick={() => setAdding(true)}>
 						<Plus className="h-4 w-4" />
 						<span className="hidden sm:inline">{t("quick.newCustomer")}</span>
 						<span className="sr-only sm:hidden">{t("quick.newCustomer")}</span>
@@ -93,28 +95,28 @@ const QuickMeasure = () => {
 				{isLoading ? (
 					<div className="space-y-2">
 						{[0, 1, 2].map((i) => (
-							<Skeleton key={i} className="h-16 w-full rounded-2xl" />
+							<Skeleton key={i} className="h-16 w-full rounded-md" />
 						))}
 					</div>
 				) : customers.length === 0 ? (
-					<p className="rounded-2xl bg-muted/60 p-6 text-center text-sm text-muted-foreground">{t("quick.noCustomers")}</p>
+					<p className="rounded-md bg-muted/60 p-6 text-center text-sm text-muted-foreground">{t("quick.noCustomers")}</p>
 				) : (
 					<>
-						<ul className="space-y-2">
+						<ul className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
 							{matches.map((c) => (
 								<li key={c.id}>
 									<button
 										type="button"
 										onClick={() => measure(c)}
 										disabled={opening === c.id}
-										className="flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-all hover:border-primary/30 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+										className="flex w-full items-center gap-3 rounded-md border p-3 text-left transition-all hover:border-primary/30 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
 									>
 										<Avatar name={c.name} size="sm" />
 										<span className="min-w-0 flex-1">
 											<span className="block truncate font-semibold">{c.name}</span>
 											<span className="block truncate text-sm tabular-nums text-muted-foreground">{c.phone ? formatPhone(c.phone) : t("customers.noContact")}</span>
 										</span>
-										<span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-primary/[0.07] px-3 text-sm font-medium text-primary">
+										<span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-primary/[0.07] px-3 text-sm font-medium text-primary">
 											<Ruler className="h-4 w-4" aria-hidden />
 											{t("quick.measure")}
 										</span>
@@ -131,11 +133,48 @@ const QuickMeasure = () => {
 			<section>
 				<SectionTitle count={recent.length || undefined}>{t("quick.recent")}</SectionTitle>
 				{loadingRecent ? (
-					<Skeleton className="h-24 w-full rounded-2xl" />
+					<Skeleton className="h-24 w-full rounded-md" />
 				) : recent.length === 0 ? (
-					<p className="rounded-3xl border border-dashed bg-card p-6 text-center text-sm text-muted-foreground">{t("quick.noRecent")}</p>
+					<p className="rounded-md border border-dashed bg-card p-6 text-center text-sm text-muted-foreground">{t("quick.noRecent")}</p>
 				) : (
-					<ul className="divide-y overflow-hidden rounded-2xl border bg-card shadow-card">
+					<>
+					<DataTable>
+						<THead>
+							<TR className="hover:bg-transparent">
+								<TH numeric className="w-12">#</TH>
+								<TH>{t("customers.col.name")}</TH>
+								<TH>{t("quick.col.measurement")}</TH>
+								<TH>{t("quick.col.taken")}</TH>
+								<TH className="w-14 text-right">{t("quick.col.actions")}</TH>
+							</TR>
+						</THead>
+						<TBody>
+							{recent.map((m, i) => (
+								<TR key={m.id}>
+									<RowNum n={i + 1} />
+									<TD>
+										<Link to={`/customers/${m.customer_id}`} className="flex items-center gap-3 font-semibold hover:underline">
+											<Avatar name={m.customers?.name ?? "?"} size="sm" />
+											<span className="truncate">{m.customers?.name ?? "—"}</span>
+										</Link>
+									</TD>
+									<TD className="max-w-[18rem] truncate text-muted-foreground">{m.title}</TD>
+									<TD className="whitespace-nowrap text-muted-foreground">{formatDate(m.created_at, shop.locale)}</TD>
+									<TD className="text-right">
+										<RowActions
+											label={t("quick.col.actionsFor", { name: m.customers?.name ?? "" })}
+											actions={[
+												{ label: t("customers.actions.view"), icon: ChevronRight, to: `/customers/${m.customer_id}` },
+												{ label: t("customers.actions.newOrder"), icon: Ruler, to: `/orders/new?customer=${m.customer_id}` },
+											]}
+										/>
+									</TD>
+								</TR>
+							))}
+						</TBody>
+					</DataTable>
+
+					<ul className="divide-y overflow-hidden rounded-md border bg-card shadow-card md:hidden">
 						{recent.map((m) => (
 							<li key={m.id}>
 								<Link
@@ -154,6 +193,7 @@ const QuickMeasure = () => {
 							</li>
 						))}
 					</ul>
+					</>
 				)}
 			</section>
 

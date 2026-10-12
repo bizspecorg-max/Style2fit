@@ -62,7 +62,7 @@ export function DiscoverPanel({ onSave }: { onSave: (image: DiscoverImage, topic
 						aria-selected={!search && group === g.key}
 						onClick={() => chooseGroup(g.key)}
 						className={cn(
-							"h-10 rounded-full text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+							"h-10 rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
 							!search && group === g.key ? "bg-card text-foreground shadow-card" : "text-muted-foreground hover:text-foreground"
 						)}
 					>
@@ -79,7 +79,7 @@ export function DiscoverPanel({ onSave }: { onSave: (image: DiscoverImage, topic
 						aria-pressed={!search && topic.key === tp.key}
 						onClick={() => chooseTopic(tp)}
 						className={cn(
-							"h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+							"h-10 shrink-0 rounded-md border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
 							!search && topic.key === tp.key ? "border-primary bg-primary text-primary-foreground shadow-card" : "bg-card hover:border-primary/30"
 						)}
 					>
@@ -97,7 +97,7 @@ export function DiscoverPanel({ onSave }: { onSave: (image: DiscoverImage, topic
 				}}
 			>
 				<Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-				<Input type="search" value={input} onChange={(e) => setInput(e.target.value)} placeholder={t("styles.discover.search")} aria-label={t("styles.discover.search")} className="h-12 rounded-full bg-card pl-11 pr-11 shadow-card" />
+				<Input type="search" value={input} onChange={(e) => setInput(e.target.value)} placeholder={t("styles.discover.search")} aria-label={t("styles.discover.search")} className="h-12 rounded-md bg-card pl-11 pr-11 shadow-card" />
 				{search && (
 					<button
 						type="button"
@@ -117,18 +117,18 @@ export function DiscoverPanel({ onSave }: { onSave: (image: DiscoverImage, topic
 			{isLoading ? (
 				<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" role="status" aria-label={t("common.loading")}>
 					{Array.from({ length: 8 }, (_, i) => (
-						<Skeleton key={i} className={cn("rounded-2xl", i % 3 ? "aspect-[3/4]" : "aspect-square")} />
+						<Skeleton key={i} className={cn("rounded-md", i % 3 ? "aspect-[3/4]" : "aspect-square")} />
 					))}
 				</div>
 			) : isError ? (
-				<div className="rounded-3xl border bg-card p-8 text-center">
+				<div className="rounded-md border bg-card p-8 text-center">
 					<p className="text-sm text-muted-foreground">{t("styles.discover.error")}</p>
 					<Button variant="outline" className="mt-4 rounded-full" onClick={() => refetch()}>
 						{t("common.retry")}
 					</Button>
 				</div>
 			) : images.length === 0 ? (
-				<p className="rounded-3xl border bg-card p-8 text-center text-sm text-muted-foreground">{t("styles.discover.empty")}</p>
+				<p className="rounded-md border bg-card p-8 text-center text-sm text-muted-foreground">{t("styles.discover.empty")}</p>
 			) : (
 				<>
 					{/* Masonry: photos keep their own shape. */}
@@ -138,7 +138,7 @@ export function DiscoverPanel({ onSave }: { onSave: (image: DiscoverImage, topic
 								<button
 									type="button"
 									onClick={() => setViewing(img)}
-									className="group relative block w-full overflow-hidden rounded-2xl bg-muted shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+									className="group relative block w-full overflow-hidden rounded-md bg-muted shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 								>
 									<img
 										src={img.thumb}
@@ -158,7 +158,7 @@ export function DiscoverPanel({ onSave }: { onSave: (image: DiscoverImage, topic
 					</ul>
 					{hasNextPage && (
 						<div className="flex justify-center">
-							<Button variant="outline" className="h-11 rounded-full bg-card px-6" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+							<Button variant="outline" className="h-11 rounded-md bg-card px-6" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
 								{isFetchingNextPage && <Loader2 className="h-4 w-4 animate-spin" />}
 								{t("styles.discover.loadMore")}
 							</Button>
@@ -182,7 +182,7 @@ export function DiscoverPanel({ onSave }: { onSave: (image: DiscoverImage, topic
 									<Credit image={viewing} />
 								</DialogDescription>
 							</DialogHeader>
-							<img src={viewing.large} alt={viewing.title} className="max-h-[55dvh] w-full rounded-2xl bg-muted object-contain" />
+							<img src={viewing.large} alt={viewing.title} className="max-h-[55dvh] w-full rounded-md bg-muted object-contain" />
 							<DialogFooter className="gap-2 sm:gap-0">
 								<Button variant="outline" className="rounded-full" asChild>
 									<a href={viewing.landingUrl} target="_blank" rel="noreferrer">

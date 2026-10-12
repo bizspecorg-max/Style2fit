@@ -26,9 +26,35 @@ export function useShop(): Shop {
 export function formatMoney(amount: number | null | undefined, currency: string, locale: string): string {
 	if (amount === null || amount === undefined) return "—";
 	try {
-		return new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
+		try {
+			return new Intl.NumberFormat(locale, { style: "currency", currency, currencyDisplay: "narrowSymbol", maximumFractionDigits: 0 }).format(amount);
+		} catch {
+			return new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
+		}
 	} catch {
 		return `${currency} ${amount.toLocaleString(locale)}`;
+	}
+}
+
+/**
+ * The currency's sign on its own — "₦", not "NGN".
+ *
+ * Used to prefix a price field, where the ISO code is three characters of
+ * noise in front of every amount.
+ */
+export function currencySign(locale: string, currency: string): string {
+	const parts = (display: "narrowSymbol" | "symbol") =>
+		new Intl.NumberFormat(locale, { style: "currency", currency, currencyDisplay: display })
+			.formatToParts(0)
+			.find((p) => p.type === "currency")?.value;
+	try {
+		return parts("narrowSymbol") ?? parts("symbol") ?? currency;
+	} catch {
+		try {
+			return parts("symbol") ?? currency;
+		} catch {
+			return currency;
+		}
 	}
 }
 

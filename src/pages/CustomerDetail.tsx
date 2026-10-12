@@ -43,7 +43,7 @@ type HistoryEntry = {
 };
 
 const PILL =
-	"inline-flex h-10 max-w-full items-center gap-2 rounded-full border bg-card px-4 text-sm font-medium shadow-card transition-colors hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+	"inline-flex h-10 max-w-full items-center gap-2 rounded-md border bg-card px-4 text-sm font-medium shadow-card transition-colors hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const WHATSAPP_PILL = "border-[#1f7a4d]/20 bg-[#1f7a4d]/[0.07] text-[#1f7a4d] hover:border-[#1f7a4d]/40";
 
 function useCustomer(id: string | undefined) {
@@ -84,7 +84,7 @@ function MeasurementCard({ entry, latest, customerName, onDelete }: { entry: His
 	};
 
 	return (
-		<article className={cn("rounded-3xl border bg-card p-5 shadow-card", latest && "border-accent/30")}>
+		<article className={cn("rounded-md border bg-card p-5 shadow-card", latest && "border-accent/30")}>
 			<header className="flex items-start justify-between gap-3">
 				<div className="min-w-0">
 					<div className="flex items-center gap-2">
@@ -117,7 +117,7 @@ function MeasurementCard({ entry, latest, customerName, onDelete }: { entry: His
 			) : (
 				<dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
 					{lines.map((l, i) => (
-						<div key={`${l.label}-${i}`} className="rounded-2xl bg-muted/60 px-3.5 py-2.5">
+						<div key={`${l.label}-${i}`} className="rounded-md bg-muted/60 px-3.5 py-2.5">
 							<dt className="truncate text-xs text-muted-foreground">{l.label}</dt>
 							<dd className="mt-0.5 font-display text-lg tabular-nums">{l.value}</dd>
 						</div>
@@ -206,16 +206,16 @@ const CustomerDetail = () => {
 		return (
 			<div className="space-y-4" role="status" aria-label={t("common.loading")}>
 				<Skeleton className="h-5 w-28" />
-				<Skeleton className="h-44 w-full rounded-3xl" />
-				<Skeleton className="h-11 w-64 rounded-full" />
-				<Skeleton className="h-48 w-full rounded-3xl" />
+				<Skeleton className="h-44 w-full rounded-md" />
+				<Skeleton className="h-11 w-64 rounded-md" />
+				<Skeleton className="h-48 w-full rounded-md" />
 			</div>
 		);
 	}
 
 	if (isError || !customer) {
 		return (
-			<div className="rounded-3xl border bg-card p-8 text-center">
+			<div className="rounded-md border bg-card p-8 text-center">
 				<p className="text-sm text-muted-foreground">{isError ? t("common.loadError") : t("customers.notFound")}</p>
 				<div className="mt-4 flex justify-center gap-2">
 					{isError && (
@@ -250,7 +250,7 @@ const CustomerDetail = () => {
 				{t("customers.title")}
 			</Link>
 
-			<section className="rounded-3xl border bg-card p-5 shadow-card sm:p-7">
+			<section className="rounded-md border bg-card p-5 shadow-card sm:p-7">
 				<div className="flex items-start gap-4">
 					<Avatar name={customer.name} size="lg" />
 					<div className="min-w-0 flex-1 pt-1">
@@ -302,14 +302,14 @@ const CustomerDetail = () => {
 						</a>
 					)}
 				</div>
-				{customer.notes && <p className="mt-4 whitespace-pre-line rounded-2xl bg-muted/60 p-4 text-sm leading-relaxed">{customer.notes}</p>}
+				{customer.notes && <p className="mt-4 whitespace-pre-line rounded-md bg-muted/60 p-4 text-sm leading-relaxed">{customer.notes}</p>}
 
 				<div className="mt-6 hidden gap-2 md:flex">
-					<Button className="h-11 rounded-full px-5" onClick={() => setMeasuring(true)}>
+					<Button className="h-11 rounded-md px-5" onClick={() => setMeasuring(true)}>
 						<Ruler className="h-4 w-4" />
 						{t("measure.new")}
 					</Button>
-					<Button variant="outline" className="h-11 rounded-full px-5" asChild>
+					<Button variant="outline" className="h-11 rounded-md px-5" asChild>
 						<Link to={newOrderHref}>
 							<Plus className="h-4 w-4" />
 							{t("customers.orderCta")}
@@ -319,12 +319,12 @@ const CustomerDetail = () => {
 			</section>
 
 			<Tabs defaultValue="measurements">
-				<TabsList className="h-12 w-full rounded-full bg-muted p-1 sm:w-auto">
-					<TabsTrigger value="measurements" className="h-10 flex-1 gap-1.5 rounded-full px-4 data-[state=active]:shadow-card sm:flex-none">
+				<TabsList className="h-12 w-full rounded-md bg-muted p-1 sm:w-auto">
+					<TabsTrigger value="measurements" className="h-10 flex-1 gap-1.5 rounded-md px-4 data-[state=active]:shadow-card sm:flex-none">
 						<Ruler className="h-4 w-4" />
 						{t("measure.tab", { count: history.length })}
 					</TabsTrigger>
-					<TabsTrigger value="orders" className="h-10 flex-1 gap-1.5 rounded-full px-4 data-[state=active]:shadow-card sm:flex-none">
+					<TabsTrigger value="orders" className="h-10 flex-1 gap-1.5 rounded-md px-4 data-[state=active]:shadow-card sm:flex-none">
 						<ClipboardList className="h-4 w-4" />
 						{t("customers.ordersTab", { count: data.orders.length })}
 					</TabsTrigger>
@@ -332,7 +332,7 @@ const CustomerDetail = () => {
 
 				<TabsContent value="measurements" className="mt-4 space-y-3">
 					{history.length === 0 ? (
-						<div className="rounded-3xl border border-dashed bg-card p-8 text-center">
+						<div className="rounded-md border border-dashed bg-card p-8 text-center">
 							<p className="text-sm text-muted-foreground">{t("measure.empty")}</p>
 							<Button variant="outline" className="mt-4 rounded-full" onClick={() => setMeasuring(true)}>
 								<Ruler className="h-4 w-4" />
@@ -360,7 +360,7 @@ const CustomerDetail = () => {
 
 				<TabsContent value="orders" className="mt-4">
 					{data.orders.length === 0 ? (
-						<div className="rounded-3xl border border-dashed bg-card p-8 text-center">
+						<div className="rounded-md border border-dashed bg-card p-8 text-center">
 							<p className="text-sm text-muted-foreground">{t("customers.noOrders")}</p>
 							<Button variant="outline" className="mt-4 rounded-full" asChild>
 								<Link to={newOrderHref}>{t("customers.newOrder")}</Link>
@@ -379,11 +379,11 @@ const CustomerDetail = () => {
 			</Tabs>
 
 			<MobileActionBar>
-				<Button variant="outline" className="h-12 flex-1 rounded-full bg-card" onClick={() => setMeasuring(true)}>
+				<Button variant="outline" className="h-12 flex-1 rounded-md bg-card" onClick={() => setMeasuring(true)}>
 					<Ruler className="h-4 w-4" />
 					{t("measure.new")}
 				</Button>
-				<Button className="h-12 flex-1 rounded-full" asChild>
+				<Button className="h-12 flex-1 rounded-md" asChild>
 					<Link to={newOrderHref}>
 						<Plus className="h-4 w-4" />
 						{t("customers.orderCta")}
@@ -412,7 +412,7 @@ const CustomerDetail = () => {
 			/>
 
 			<AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-				<AlertDialogContent className="rounded-3xl">
+				<AlertDialogContent className="rounded-md">
 					<AlertDialogHeader>
 						<AlertDialogTitle>{t("customers.deleteTitle", { name: customer.name })}</AlertDialogTitle>
 						<AlertDialogDescription>{data.orders.length ? t("customers.deleteBlocked") : t("customers.deleteBody")}</AlertDialogDescription>
@@ -429,7 +429,7 @@ const CustomerDetail = () => {
 			</AlertDialog>
 
 			<AlertDialog open={!!deletingMeasurement} onOpenChange={(open) => !open && setDeletingMeasurement(null)}>
-				<AlertDialogContent className="rounded-3xl">
+				<AlertDialogContent className="rounded-md">
 					<AlertDialogHeader>
 						<AlertDialogTitle>{t("measure.deleteTitle")}</AlertDialogTitle>
 						<AlertDialogDescription>{t("measure.deleteBody", { title: deletingMeasurement?.title })}</AlertDialogDescription>

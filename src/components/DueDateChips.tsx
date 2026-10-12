@@ -26,7 +26,7 @@ export function DueDateChips({ value, onChange }: { value: string; onChange: (is
 						aria-pressed={value === iso}
 						onClick={() => onChange(iso)}
 						className={cn(
-							"h-8 rounded-full border px-3 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+							"h-8 rounded-md border px-3 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
 							value === iso ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:border-primary/40"
 						)}
 					>

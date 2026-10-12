@@ -42,7 +42,7 @@ function FieldError({ id, message }: { id: string; message?: string }) {
 function FormError({ message }: { message?: string }) {
 	if (!message) return null;
 	return (
-		<p role="alert" className="rounded-2xl bg-destructive/10 p-3 text-sm text-destructive">
+		<p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
 			{message}
 		</p>
 	);
@@ -135,7 +135,7 @@ function SignInForm({ onForgot }: { onForgot: () => void }) {
 				<FieldError id="signin-password-error" message={errors.password} />
 			</div>
 			<FormError message={errors.form} />
-			<Button type="submit" className="h-12 w-full rounded-full text-base shadow-soft" disabled={submitting}>
+			<Button type="submit" className="h-12 w-full rounded-md text-base shadow-soft" disabled={submitting}>
 				{submitting && <Loader2 className="h-4 w-4 animate-spin" />}
 				{submitting ? t("auth.signingIn") : t("auth.signIn")}
 			</Button>
@@ -168,7 +168,7 @@ function Stepper({ step }: { step: 1 | 2 }) {
 							{done ? <Check className="h-3.5 w-3.5" aria-hidden /> : n}
 						</span>
 						<span className={step === n ? "text-foreground" : "text-muted-foreground"}>{label}</span>
-						{i === 0 && <span className={cn("h-0.5 flex-1 rounded-full", done ? "bg-primary" : "bg-border")} aria-hidden />}
+						{i === 0 && <span className={cn("h-0.5 flex-1 rounded-md", done ? "bg-primary" : "bg-border")} aria-hidden />}
 					</li>
 				);
 			})}
@@ -298,7 +298,7 @@ function SignUpForm() {
 						<PasswordStrength id="signup-password-strength" password={password} />
 					</div>
 					<FormError message={errors.form} />
-					<Button type="submit" className="h-12 w-full rounded-full text-base shadow-soft">
+					<Button type="submit" className="h-12 w-full rounded-md text-base shadow-soft">
 						{t("signup.continue")}
 					</Button>
 				</form>
@@ -318,11 +318,11 @@ function SignUpForm() {
 					/>
 					<FormError message={errors.form} />
 					<div className="flex gap-2">
-						<Button type="button" variant="outline" className="h-12 rounded-full px-5" onClick={() => setStep(1)} disabled={submitting}>
+						<Button type="button" variant="outline" className="h-12 rounded-md px-5" onClick={() => setStep(1)} disabled={submitting}>
 							<ArrowLeft className="h-4 w-4" />
 							{t("signup.back")}
 						</Button>
-						<Button type="submit" className="h-12 flex-1 rounded-full text-base shadow-soft" disabled={submitting}>
+						<Button type="submit" className="h-12 flex-1 rounded-md text-base shadow-soft" disabled={submitting}>
 							{submitting && <Loader2 className="h-4 w-4 animate-spin" />}
 							{submitting ? t("signup.creating") : t("signup.create")}
 						</Button>
@@ -371,7 +371,6 @@ function ForgotPasswordDialog({ open, onOpenChange }: { open: boolean; onOpenCha
 						<Label htmlFor="reset-email">{t("auth.email")}</Label>
 						<Input
 							id="reset-email"
-							autoFocus
 							type="email"
 							inputMode="email"
 							autoComplete="email"
@@ -469,11 +468,11 @@ const Auth = () => {
 				<div className="-mt-6 flex flex-1 justify-center rounded-t-[1.75rem] bg-background px-5 pb-10 pt-7 sm:px-8 lg:mt-0 lg:items-center lg:rounded-none">
 					<div className="w-full max-w-md">
 						<Tabs value={tab} onValueChange={(v) => setTab(v as "signin" | "signup")}>
-							<TabsList className="mb-8 grid h-12 w-full grid-cols-2 rounded-full bg-muted p-1">
-								<TabsTrigger value="signin" className="h-10 rounded-full text-sm data-[state=active]:shadow-card">
+							<TabsList className="mb-8 grid h-12 w-full grid-cols-2 rounded-md bg-muted p-1">
+								<TabsTrigger value="signin" className="h-10 rounded-md text-sm data-[state=active]:shadow-card">
 									{t("auth.signInTab")}
 								</TabsTrigger>
-								<TabsTrigger value="signup" className="h-10 rounded-full text-sm data-[state=active]:shadow-card">
+								<TabsTrigger value="signup" className="h-10 rounded-md text-sm data-[state=active]:shadow-card">
 									{t("auth.signUpTab")}
 								</TabsTrigger>
 							</TabsList>

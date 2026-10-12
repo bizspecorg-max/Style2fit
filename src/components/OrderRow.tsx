@@ -23,7 +23,18 @@ export function useDueLabel() {
 }
 
 /** The order card used on the orders list and the dashboard. */
-export function OrderRow({ order, showPayment = true, titleFrom = "customer" }: { order: Order; showPayment?: boolean; titleFrom?: "customer" | "style" }) {
+export function OrderRow({
+	order,
+	showPayment = true,
+	titleFrom = "customer",
+	flat = false,
+}: {
+	order: Order;
+	showPayment?: boolean;
+	titleFrom?: "customer" | "style";
+	/** A row inside one bordered list, rather than a card of its own. */
+	flat?: boolean;
+}) {
 	const { t } = useTranslation();
 	const shop = useShop();
 	const dueLabel = useDueLabel();
@@ -34,9 +45,14 @@ export function OrderRow({ order, showPayment = true, titleFrom = "customer" }: 
 		<Link
 			to={`/orders/${order.id}`}
 			className={cn(
-				"group flex items-center gap-3 rounded-2xl border bg-card p-3 shadow-card transition-all duration-200 sm:gap-4 sm:p-4",
-				"hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-				isOverdue(order) && "border-status-overdue/25"
+				"group flex items-center gap-3 transition-all duration-200 sm:gap-4",
+				flat
+					? "px-4 py-3 hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none"
+					: [
+							"rounded-md border bg-card p-3 shadow-card sm:p-4",
+							"hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+							isOverdue(order) && "border-status-overdue/25",
+						]
 			)}
 		>
 			<span className="flex h-[4.5rem] w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted sm:h-20 sm:w-16">
@@ -53,7 +69,7 @@ export function OrderRow({ order, showPayment = true, titleFrom = "customer" }: 
 				</span>
 				<span className="mt-0.5 block truncate text-sm text-muted-foreground">
 					{titleFrom === "customer" && <>{order.styles?.name ?? "—"} · </>}
-					<span className="text-muted-foreground/70">{shortCode(order.code)}</span>
+					<span className="text-muted-foreground/70">{order.code ? shortCode(order.code) : ""}</span>
 				</span>
 				<span className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
 					<span className={cn("inline-flex items-center gap-1 text-xs font-medium", due.tone)}>

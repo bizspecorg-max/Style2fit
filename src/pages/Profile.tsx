@@ -25,9 +25,9 @@ const WHATSAPP = "border-[#1f7a4d]/25 bg-[#1f7a4d]/[0.07] text-[#1f7a4d] hover:b
 
 function Section({ icon: Icon, title, description, children }: { icon: React.ComponentType<{ className?: string }>; title: string; description?: string; children: React.ReactNode }) {
 	return (
-		<section className="rounded-3xl border bg-card p-5 shadow-card sm:p-7">
+		<section className="rounded-md border bg-card p-5 shadow-card sm:p-7">
 			<div className="mb-6 flex items-start gap-3">
-				<span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-accent-soft text-accent" aria-hidden>
+				<span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-accent-soft text-accent" aria-hidden>
 					<Icon className="h-4 w-4" />
 				</span>
 				<div>
@@ -115,7 +115,7 @@ function ShopSection() {
 				}}
 				errors={errors}
 			/>
-			<Button type="submit" className="h-12 w-full rounded-full px-6 sm:w-auto" disabled={saving}>
+			<Button type="submit" className="h-12 w-full rounded-md px-6 sm:w-auto" disabled={saving}>
 				{saving && <Loader2 className="h-4 w-4 animate-spin" />}
 				{t("profile.saveShop")}
 			</Button>
@@ -172,11 +172,11 @@ function PasswordSection() {
 			</div>
 			<PasswordStrength id="new-password-strength" password={next} />
 			{error && (
-				<p role="alert" className="rounded-2xl bg-destructive/10 p-3 text-sm text-destructive">
+				<p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
 					{error}
 				</p>
 			)}
-			<Button type="submit" variant="outline" className="h-12 w-full rounded-full px-6 sm:w-auto" disabled={saving}>
+			<Button type="submit" variant="outline" className="h-12 w-full rounded-md px-6 sm:w-auto" disabled={saving}>
 				{saving && <Loader2 className="h-4 w-4 animate-spin" />}
 				{t("profile.updatePassword")}
 			</Button>
@@ -192,7 +192,7 @@ function SubscriptionSection() {
 	const { data: subscription, isLoading } = useSubscription();
 	const [paying, setPaying] = useState(false);
 
-	if (isLoading) return <Skeleton className="h-28 w-full rounded-2xl" />;
+	if (isLoading) return <Skeleton className="h-28 w-full rounded-md" />;
 
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
@@ -206,11 +206,11 @@ function SubscriptionSection() {
 	return (
 		<div className="space-y-5">
 			{searchParams.get("expired") === "true" && !active && !onTrial && (
-				<p role="alert" className="rounded-2xl bg-destructive/10 p-3 text-sm text-destructive">
+				<p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
 					{t("profile.expiredBanner")}
 				</p>
 			)}
-			<div className="flex flex-col gap-4 rounded-2xl bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+			<div className="flex flex-col gap-4 rounded-md bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between">
 				<div className="space-y-1.5">
 					<StatusPill tone={active ? "paid" : onTrial ? "pending" : "overdue"}>
 						{active ? t("profile.planActive") : onTrial ? t("profile.planTrial") : t("profile.planExpired")}
@@ -223,7 +223,7 @@ function SubscriptionSection() {
 								: t("profile.subscribeToContinue")}
 					</p>
 				</div>
-				<Button className="h-11 rounded-full px-5" variant={active ? "outline" : "default"} onClick={() => setPaying(true)}>
+				<Button className="h-11 rounded-md px-5" variant={active ? "outline" : "default"} onClick={() => setPaying(true)}>
 					<CreditCard className="h-4 w-4" />
 					{active ? t("profile.renew") : t("profile.upgrade")}
 				</Button>
@@ -236,7 +236,7 @@ function SubscriptionSection() {
 						<DialogDescription>{nigeria ? t("profile.payBodyNg") : t("profile.payBodyIntl")}</DialogDescription>
 					</DialogHeader>
 					{nigeria && (
-						<div className="rounded-2xl bg-muted p-4">
+						<div className="rounded-md bg-muted p-4">
 							<p className="text-sm text-muted-foreground">{t("profile.opay")}</p>
 							<p className="mt-1 font-display text-2xl tracking-wider tabular-nums">703 559 9433</p>
 							<p className="mt-1 text-sm">
@@ -297,7 +297,7 @@ const Profile = () => {
 			</Section>
 			<Section icon={UserRound} title={t("profile.helpTitle")} description={t("profile.helpBody")}>
 				<div className="flex flex-col gap-2 sm:flex-row">
-					<Button variant="outline" className={`h-12 rounded-full px-5 ${WHATSAPP}`} asChild>
+					<Button variant="outline" className={`h-12 rounded-md px-5 ${WHATSAPP}`} asChild>
 						<a href={whatsappLink(SUPPORT_PHONE, t("profile.supportMessage", { email: user?.email ?? "" }))} target="_blank" rel="noreferrer">
 							<MessageCircle className="h-4 w-4" />
 							{t("profile.whatsappSupport")}
@@ -305,7 +305,7 @@ const Profile = () => {
 					</Button>
 					<Button
 						variant="ghost"
-						className="h-12 rounded-full px-5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+						className="h-12 rounded-md px-5 text-destructive hover:bg-destructive/10 hover:text-destructive"
 						onClick={async () => {
 							await signOut();
 							navigate("/auth", { replace: true });
